@@ -9,7 +9,8 @@ To build EnMasse, you need
    * [Docker](https://www.docker.com/)
    * [GNU Make](https://www.gnu.org/software/make/)
    * [Asciidoctor](https://asciidoctor.org/) >= 1.5.7
-   
+   * [Go](https://golang.org/) > 1.10.0
+
 *Note*: On OSX, make sure you have [Coreutils](https://www.gnu.org/software/coreutils/) installed, e.g. `brew install coreutils`
 
 The EnMasse java and node modules are built using maven. All docker images are built using make.
@@ -18,6 +19,23 @@ The EnMasse java and node modules are built using maven. All docker images are b
 
 To run EnMasse you need a Kubernetes cluster. Most EnMasse developers use [OKD](https://www.okd.io/)
 for running tests on their machine.
+
+## Checking out for Go
+
+If you want to work with the Go parts of this repository, you will need to perform the
+following steps.
+
+### Create a Go workspace
+
+Create a new directory and set the `GOPATH` environment variable:
+
+    export GOPATH=/home/user/my-enmasse-gobase
+    mkdir -p $GOPATH/src/github.com/enmasseproject
+
+### Clone the git repository into this workspace
+
+    cd $GOPATH/src/github.com/enmasseproject
+    git clone https://github.com/enmasseproject/enmasse
 
 ## Building
 
