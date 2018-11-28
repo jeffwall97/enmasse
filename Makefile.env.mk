@@ -5,8 +5,7 @@ DOCKER          ?= docker
 PROJECT_PREFIX  ?= enmasse
 PROJECT_NAME    ?= $(shell basename $(CURDIR))
 COMMIT 			?= $(shell git rev-parse HEAD)
-VERSION         ?= $(shell grep "release.version" $(TOPDIR)/pom.properties| cut -d'=' -f2)
-MAVEN_VERSION   ?= $(shell grep "maven.version" $(TOPDIR)/pom.properties| cut -d'=' -f2)
+VERSION         ?= $(shell grep "release.version" $(TOPDIR)/pom.properties| cut -d'=' -f2) MAVEN_VERSION   ?= $(shell grep "maven.version" $(TOPDIR)/pom.properties| cut -d'=' -f2)
 TAG             ?= latest
 
 # Image settings
@@ -34,6 +33,7 @@ GRAFANA_IMAGE ?= "grafana/grafana:5.3.1"
 KUBE_STATE_METRICS_IMAGE ?= "quay.io/coreos/kube-state-metrics:v1.4.0"
 OAUTH_PROXY_IMAGE ?= "openshift/oauth-proxy:latest"
 DEFAULT_PROJECT ?= "enmasse-infra"
+HONO_VERSION ?= "0.8"
 IMAGE_PULL_POLICY ?= "Always"
 
 IMAGE_ENV=ADDRESS_SPACE_CONTROLLER_IMAGE=$(ADDRESS_SPACE_CONTROLLER_IMAGE) \
@@ -59,5 +59,6 @@ IMAGE_ENV=ADDRESS_SPACE_CONTROLLER_IMAGE=$(ADDRESS_SPACE_CONTROLLER_IMAGE) \
 			KUBE_STATE_METRICS_IMAGE=$(KUBE_STATE_METRICS_IMAGE) \
 			OAUTH_PROXY_IMAGE=$(OAUTH_PROXY_IMAGE) \
 			IMAGE_PULL_POLICY=$(IMAGE_PULL_POLICY) \
+			HONO_VERSION=${HONO_VERSION} \
 			ENMASSE_VERSION=$(VERSION)
 
