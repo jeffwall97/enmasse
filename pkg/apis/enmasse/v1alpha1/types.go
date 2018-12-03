@@ -14,7 +14,7 @@ import (
 
 type AddressSpace struct {
     metav1.TypeMeta   `json:",inline"`
-    metav1.ObjectMeta `json:"metadata,omitempty"'`
+    metav1.ObjectMeta `json:"metadata,omitempty"`
 
     Spec   AddressSpaceSpec   `json:"spec"`
     Status AddressSpaceStatus `json:"status"`

@@ -14,7 +14,7 @@ import (
 
 type IoTProject struct {
     metav1.TypeMeta   `json:",inline"`
-    metav1.ObjectMeta `json:"metadata,omitempty"'`
+    metav1.ObjectMeta `json:"metadata,omitempty"`
 
     Spec IoTProjectSpec `json:"spec"`
 }
