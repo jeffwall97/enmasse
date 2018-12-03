@@ -9,6 +9,6 @@ ARG version
 ARG commit
 ENV VERSION=${version} COMMIT=${commit}
 
-ADD hono-qdr-configurator /
+ADD qdr-proxy-configurator /
 
-ENTRYPOINT /hono-qdrouter-configurator
+ENTRYPOINT /qdr-proxy-configurator
