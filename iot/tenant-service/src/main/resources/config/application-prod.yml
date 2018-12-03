@@ -6,4 +6,20 @@ enmasse:
       endpoint:
 
         amqp:
-          nativeTlsRequired: true
+          insecurePortBindAddress: 0.0.0.0
+          insecurePortEnabled: true
+          insecurePort: 5672
+
+        http:
+          insecurePortBindAddress: 0.0.0.0
+          insecurePortEnabled: true
+          insecurePort: 8080
+
+      auth:
+        port: 5671
+        keyPath: /etc/tls/tls.key
+        certPath: /etc/tls/tls.crt
+        keyFormat: PEM
+        trustStorePath: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+        trustStoreFormat: PEM
+        name: 'EnMasse IoT Tenant Service'

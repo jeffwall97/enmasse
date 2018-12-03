@@ -12,16 +12,21 @@ enmasse:
         healthCheckBindAddress: 0.0.0.0
         healthCheckPort: 8088
 
-      endpoint:
-        amqp:
-          port: 5671
+server:
+  port: -1
+## Enable management server
+management:
+  port: 8081
+  security:
+    enabled: false
+## Disable all but the promtheus endpoint
+endpoints:
+  enabled: false
+  prometheus:
+    enabled: true
 
-  auth:
-    host: ${hono.auth.host}
-    port: 5671
-    keyPath: ${secret.path}/device-registry-key.pem
-    certPath: ${secret.path}/device-registry-cert.pem
-    trustStorePath: ${secret.path}/trusted-certs.pem
-    name: 'Hono Device Registry'
-    validation:
-      certPath: ${secret.path}/auth-server-cert.pem
+management:
+  metrics:
+    export:
+      graphite:
+        enabled: false

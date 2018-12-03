@@ -7,22 +7,20 @@ package io.enmasse.iot.tenant.impl;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.eclipse.hono.service.HealthCheckProvider;
 import org.eclipse.hono.service.tenant.BaseTenantService;
 import org.eclipse.hono.util.TenantResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import io.enmasse.iot.tenant.Application;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.healthchecks.HealthCheckHandler;
 
 @Service
-public class TenantServiceImpl extends BaseTenantService<TenantServiceConfigProperties> {
-
-    @SuppressWarnings("unused")
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+@Scope("prototype")
+public class TenantServiceImpl extends BaseTenantService<TenantServiceConfigProperties> implements HealthCheckProvider {
 
     @Override
     public void setConfig(final TenantServiceConfigProperties configuration) {
@@ -34,7 +32,17 @@ public class TenantServiceImpl extends BaseTenantService<TenantServiceConfigProp
     }
 
     @Override
-    public void get(final X500Principal subjectDn, final Handler<AsyncResult<TenantResult<JsonObject>>> resultHandler) {
+    public void get(final X500Principal subjectDn,
+            final Handler<AsyncResult<TenantResult<JsonObject>>> resultHandler) {
         super.get(subjectDn, resultHandler);
     }
+
+    @Override
+    public void registerReadinessChecks(final HealthCheckHandler readinessHandler) {
+    }
+
+    @Override
+    public void registerLivenessChecks(final HealthCheckHandler livenessHandler) {
+    }
+
 }
