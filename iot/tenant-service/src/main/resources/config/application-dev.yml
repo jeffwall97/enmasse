@@ -1,0 +1,10 @@
+enmasse:
+  iot:
+
+    tenant:
+
+      endpoint:
+
+        amqp:
+          insecurePortEnabled: true
+          insecurePort: 15671

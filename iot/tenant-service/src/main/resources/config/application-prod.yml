@@ -1,0 +1,9 @@
+enmasse:
+  iot:
+
+    tenant:
+
+      endpoint:
+
+        amqp:
+          nativeTlsRequired: true
