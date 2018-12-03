@@ -1,5 +1,5 @@
 hash: 0e30d6e1903e9710a94015741883212d7e07c245fcc7c2c33f3251baf6923ed8
-updated: 2018-11-28T18:01:48.548423305+01:00
+updated: 2018-12-03T16:55:18.117142623+01:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
@@ -93,7 +93,7 @@ imports:
   subpackages:
   - rate
 - name: golang.org/x/tools
-  version: e782529d0ddd4bb872a63766185bebe89c96d1ae
+  version: d0ca3933b724e6be513276cc2edb34e10d667438
 - name: google.golang.org/appengine
   version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
