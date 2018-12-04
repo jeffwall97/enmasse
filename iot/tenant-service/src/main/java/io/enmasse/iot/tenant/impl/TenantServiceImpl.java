@@ -72,6 +72,8 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
             final String tenantId,
             final Handler<AsyncResult<TenantResult<JsonObject>>> resultHandler) {
 
+        logger.trace("Get - Tenant Id: {}", tenantId );
+
         withClient(client -> {
 
             final Client projects = IoTProjects.forClient(client);
