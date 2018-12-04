@@ -13,10 +13,15 @@ import java.lang.annotation.Target;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 
 @JacksonAnnotationsInside
+@JsonDeserialize(
+        using = JsonDeserializer.None.class
+)
 @JsonPropertyOrder({ "apiVersion", "kind" })
 @JsonAppend(prepend = true, props = {
         @Prop(name = "apiVersion", value = ApiVersionWriter.class, type = String.class, required = true),
