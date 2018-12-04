@@ -4,9 +4,13 @@
  */
 package io.enmasse.iot.model.v1;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class IoTProjectSpec {
 
     private DownstreamStrategy downstreamStrategy;
+
+    private ObjectNode configuration;
 
     public DownstreamStrategy getDownstreamStrategy() {
         return this.downstreamStrategy;
@@ -14,6 +18,14 @@ public class IoTProjectSpec {
 
     public void setDownstreamStrategy(final DownstreamStrategy downstreamStrategy) {
         this.downstreamStrategy = downstreamStrategy;
+    }
+
+    public ObjectNode getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(ObjectNode configuration) {
+        this.configuration = configuration;
     }
 
 }

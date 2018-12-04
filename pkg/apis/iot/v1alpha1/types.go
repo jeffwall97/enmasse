@@ -20,7 +20,8 @@ type IoTProject struct {
 }
 
 type IoTProjectSpec struct {
-    DownstreamStrategy DownstreamStrategy `json:"downstreamStrategy"`
+    Configuration      map[string]interface{} `json:"configuration"`
+    DownstreamStrategy DownstreamStrategy     `json:"downstreamStrategy"`
 }
 
 type DownstreamStrategy struct {
