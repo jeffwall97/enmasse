@@ -5,5 +5,19 @@
 
 package io.enmasse.iot.tenant.impl;
 
+import java.time.Duration;
+
 public class TenantServiceConfigProperties {
+
+    private static final Duration DEFAULT_CACHE_TIME_TO_LIVE = Duration.ofMinutes(5);
+
+    private Duration cacheTimeToLive = DEFAULT_CACHE_TIME_TO_LIVE;
+
+    public void setCacheTimeToLive(final Duration cacheTimeToLive) {
+        this.cacheTimeToLive = cacheTimeToLive != null ? cacheTimeToLive : DEFAULT_CACHE_TIME_TO_LIVE;
+    }
+
+    public Duration getCacheTimeToLive() {
+        return this.cacheTimeToLive;
+    }
 }

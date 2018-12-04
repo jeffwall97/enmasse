@@ -30,6 +30,16 @@
     </dependency>
 
     <dependency>
+      <groupId>io.enmasse</groupId>
+      <artifactId>address-model-lib</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.fabric8</groupId>
+      <artifactId>kubernetes-client</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-transport-native-epoll</artifactId>
       <scope>runtime</scope>
