@@ -20,6 +20,10 @@
     <micrometer.version>1.0.6</micrometer.version>
   </properties>
 
+  <modules>
+    <module>tenant-service</module>
+  </modules>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
