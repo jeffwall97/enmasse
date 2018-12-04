@@ -7,6 +7,7 @@ package v1alpha1
 
 import (
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // +genclient
@@ -20,8 +21,8 @@ type IoTProject struct {
 }
 
 type IoTProjectSpec struct {
-    Configuration      map[string]interface{} `json:"configuration"`
-    DownstreamStrategy DownstreamStrategy     `json:"downstreamStrategy"`
+    Configuration      unstructured.Unstructured `json:"configuration"`
+    DownstreamStrategy DownstreamStrategy        `json:"downstreamStrategy"`
 }
 
 type DownstreamStrategy struct {
