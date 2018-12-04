@@ -14,6 +14,8 @@ import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.hono.util.CacheDirective;
 import org.eclipse.hono.util.TenantResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,8 @@ import io.vertx.core.json.JsonObject;
 @Service
 @Scope("prototype")
 public class TenantServiceImpl extends AbstractKubernetesTenantService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TenantServiceImpl.class);
 
     private static final TenantResult<JsonObject> RESULT_NOT_FOUND = TenantResult
             .from(HttpURLConnection.HTTP_NOT_FOUND);
@@ -48,11 +52,17 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
         final Optional<KubernetesClient> client = getClient();
 
         if (!client.isPresent()) {
+            logger.warn("No client is present. Failing operation...");
             resultHandler.handle(Future.failedFuture("No Kubernetes client present"));
         }
 
         callBlocking(() -> {
-            return operation.run(client.get());
+            try {
+                return operation.run(client.get());
+            } catch (final Exception e) {
+                logger.info("Failed to execute operation", e);
+                throw e;
+            }
         }, resultHandler);
 
     }
@@ -75,11 +85,7 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
     public void get(final X500Principal subjectDn,
             final Handler<AsyncResult<TenantResult<JsonObject>>> resultHandler) {
 
-        withClient(client -> {
-
-            return null;
-
-        }, resultHandler);
+        super.get(subjectDn, resultHandler);
 
     }
 

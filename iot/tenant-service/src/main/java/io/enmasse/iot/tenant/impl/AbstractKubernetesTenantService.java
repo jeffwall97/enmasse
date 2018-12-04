@@ -29,8 +29,12 @@ public abstract class AbstractKubernetesTenantService extends BaseTenantService<
 
     protected <T> void runBlocking(final Runnable runnable, final Handler<AsyncResult<T>> handler) {
         this.vertx.executeBlocking(future -> {
-            runnable.run();
-            future.complete();
+            try {
+                runnable.run();
+                future.complete();
+            } catch (final Exception e) {
+                future.fail(e);
+            }
         }, handler);
     }
 
