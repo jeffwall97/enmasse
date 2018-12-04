@@ -7,6 +7,9 @@ package io.enmasse.iot.model;
 
 import java.lang.reflect.Proxy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.enmasse.iot.model.v1.DoneableIoTProject;
 import io.enmasse.iot.model.v1.IoTProject;
 import io.enmasse.iot.model.v1.IoTProjectList;
@@ -15,6 +18,13 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
 public final class IoTProjects {
+
+    private static final Logger logger = LoggerFactory.getLogger(IoTProjects.class);
+
+    static {
+        logger.info("CRD: {}", IoTProject.CRD);
+    }
+
     private IoTProjects() {
     }
 
