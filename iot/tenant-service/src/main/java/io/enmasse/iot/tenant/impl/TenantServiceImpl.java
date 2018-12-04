@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.enmasse.iot.model.IoTProjects;
 import io.enmasse.iot.model.IoTProjects.Client;
 import io.enmasse.iot.model.v1.IoTProject;
@@ -39,8 +41,10 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
 
     @FunctionalInterface
     private interface TenantOperation {
-        TenantResult<JsonObject> run(KubernetesClient client);
+        TenantResult<JsonObject> run(KubernetesClient client) throws Exception;
     }
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     protected void withClient(
             final TenantOperation operation,
@@ -72,7 +76,7 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
             final String tenantId,
             final Handler<AsyncResult<TenantResult<JsonObject>>> resultHandler) {
 
-        logger.trace("Get - Tenant Id: {}", tenantId );
+        logger.trace("Get - Tenant Id: {}", tenantId);
 
         withClient(client -> {
 
@@ -91,7 +95,7 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
 
     }
 
-    private TenantResult<JsonObject> getTenant(final Client projects, final String tenantId) {
+    private TenantResult<JsonObject> getTenant(final Client projects, final String tenantId) throws Exception {
 
         final String[] toks = tenantId.split("\\.", 2);
 
@@ -110,9 +114,16 @@ public class TenantServiceImpl extends AbstractKubernetesTenantService {
             return RESULT_NOT_FOUND;
         }
 
+        String payload;
+        if (project.getSpec().getConfiguration() != null) {
+            payload = this.objectMapper.writeValueAsString(project.getSpec().getConfiguration());
+        } else {
+            payload = null;
+        }
+
         return TenantResult.from(
                 HttpURLConnection.HTTP_OK,
-                JsonObject.mapFrom(project),
+                payload != null ? new JsonObject(payload) : new JsonObject(),
                 CacheDirective.maxAgeDirective(this.configuration.getCacheTimeToLive().getSeconds()));
     }
 
