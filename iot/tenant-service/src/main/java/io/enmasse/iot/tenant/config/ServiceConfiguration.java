@@ -6,12 +6,15 @@
 package io.enmasse.iot.tenant.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.enmasse.iot.tenant.impl.TenantServiceConfigProperties;
 
 @Configuration
 public class ServiceConfiguration {
+
+    @Bean
     @ConfigurationProperties(prefix = "enmasse.iot.tenant.service")
     public TenantServiceConfigProperties tenantsProperties() {
         return new TenantServiceConfigProperties();
