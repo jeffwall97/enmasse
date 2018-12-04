@@ -6,9 +6,10 @@ enmasse:
       endpoint:
 
         amqp:
-          insecurePortBindAddress: 0.0.0.0
-          insecurePortEnabled: true
-          insecurePort: 5672
+          bindAddress: 0.0.0.0
+          keyPath: /etc/tls/tls.key
+          certPath: /etc/tls/tls.crt
+          keyFormat: PEM
 
         http:
           insecurePortBindAddress: 0.0.0.0

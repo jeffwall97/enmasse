@@ -12,6 +12,9 @@ spec:
     - name: http
       port: 8080
       targetPort: 8080
+    - name: amqps
+      port: 5671
+      targetPort: 5671
   selector:
     app: iot-tenant-service
     deploymentconfig: iot-tenant-service

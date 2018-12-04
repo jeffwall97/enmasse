@@ -53,14 +53,16 @@ spec:
           limits:
             memory: 512Mi
         ports:
-        - containerPort: 8778 
-          name: jolokia
-        - containerPort: 8088
-          name: health
-        - containerPort: 8080
-          name: service
+        - name: jolokia
+          containerPort: 8778 
+        - name: health
+          containerPort: 8088
+        - name: service
+          containerPort: 8080
         - name: actuator
-          port: 8081
+          containerPort: 8081
+        - name: amqps
+          containerPort: 5671
         volumeMounts:
         - mountPath: /etc/config
           name: conf
