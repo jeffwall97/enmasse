@@ -37,7 +37,7 @@ public class CustomResourceTest {
 
     @Test
     public void testResourceDefinition1() {
-        final CustomResourceDefinition definition = CustomResources.fromClass(Foo.class);
+        final CustomResourceDefinition definition = CustomResources.createFromClass(Foo.class);
 
         assertEquals("foos.iot.enmasse.io", definition.getMetadata().getName());
 
@@ -52,7 +52,7 @@ public class CustomResourceTest {
 
     @Test
     public void testResourceDefinition2() {
-        final CustomResourceDefinition definition = CustomResources.fromClass(Bar.class);
+        final CustomResourceDefinition definition = CustomResources.createFromClass(Bar.class);
 
         assertEquals("baas.iot.enmasse.io", definition.getMetadata().getName());
 
@@ -67,7 +67,7 @@ public class CustomResourceTest {
 
     @Test
     public void testResourceDefinition3() {
-        final CustomResourceDefinition definition = CustomResources.fromClass(Baz.class);
+        final CustomResourceDefinition definition = CustomResources.createFromClass(Baz.class);
 
         assertEquals("bazzes.iot.enmasse.io", definition.getMetadata().getName());
 

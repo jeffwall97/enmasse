@@ -4,8 +4,11 @@
  */
 package io.enmasse.iot.model.v1;
 
+import static io.fabric8.kubernetes.internal.KubernetesDeserializer.registerCustomKind;
+
 import java.util.Optional;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinitionBuilder;
 
@@ -13,7 +16,7 @@ public final class CustomResources {
     private CustomResources() {
     }
 
-    public static CustomResourceDefinition fromClass(final Class<?> clazz) {
+    public static CustomResourceDefinition createFromClass(final Class<?> clazz) {
 
         final String kind = clazz.getSimpleName();
         final CustomResource customResource = clazz.getAnnotation(CustomResource.class);
@@ -53,7 +56,7 @@ public final class CustomResources {
         }
 
         // if the singular is set to "none"
-        
+
         if (singular != null && singular.isEmpty()) {
             // set it to null
             singular = null;
@@ -81,5 +84,17 @@ public final class CustomResources {
                 .endSpec()
 
                 .build();
+    }
+
+    public static CustomResourceDefinition fromClass(final Class<? extends HasMetadata> clazz) {
+
+        final CustomResourceDefinition result = createFromClass(clazz);
+
+        registerCustomKind(
+                result.getSpec().getGroup() + "/" + result.getSpec().getVersion(),
+                result.getSpec().getNames().getKind(),
+                clazz);
+
+        return result;
     }
 }

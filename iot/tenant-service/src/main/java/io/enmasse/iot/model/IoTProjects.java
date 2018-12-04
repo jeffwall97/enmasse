@@ -41,5 +41,4 @@ public final class IoTProjects {
                     return method.invoke(result, args);
                 });
     }
-
 }

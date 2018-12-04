@@ -15,7 +15,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
+import io.enmasse.iot.model.IoTProjects;
 import io.enmasse.iot.tenant.impl.TenantServiceImpl;
+import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
