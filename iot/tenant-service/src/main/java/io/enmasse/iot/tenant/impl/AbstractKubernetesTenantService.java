@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.hono.service.HealthCheckProvider;
 import org.eclipse.hono.service.tenant.BaseTenantService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -73,6 +74,7 @@ public abstract class AbstractKubernetesTenantService extends BaseTenantService<
         }
     }
 
+    @Autowired
     @Override
     public void setConfig(final TenantServiceConfigProperties configuration) {
         this.configuration = configuration;
