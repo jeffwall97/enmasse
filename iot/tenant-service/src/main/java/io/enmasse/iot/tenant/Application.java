@@ -15,9 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
-import io.enmasse.iot.model.IoTProjects;
 import io.enmasse.iot.tenant.impl.TenantServiceImpl;
-import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -48,7 +46,7 @@ public class Application extends AbstractApplication {
 
         for (int i = 0; i < maxInstances; i++) {
 
-            final TenantServiceImpl serviceInstance = context.getBean(TenantServiceImpl.class);
+            final TenantServiceImpl serviceInstance = this.context.getBean(TenantServiceImpl.class);
 
             final Future<String> deployTracker = Future.future();
             vertx.deployVerticle(serviceInstance, deployTracker.completer());
