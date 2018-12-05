@@ -17,6 +17,7 @@ enmasse:
           keyPath: /etc/tls/tls.key
           certPath: /etc/tls/tls.crt
           keyFormat: PEM
+          nativeTlsRequired: true
 
         http:
           insecurePortBindAddress: 0.0.0.0
