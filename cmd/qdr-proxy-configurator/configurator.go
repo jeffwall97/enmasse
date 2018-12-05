@@ -65,9 +65,8 @@ func NewConfigurator(
         projectLister:  projectInformer.Lister(),
         projectsSynced: projectInformer.Informer().HasSynced,
 
-        // TODO: disable due to enmasse#2074
-        // addressSpaceLister:  addressSpaceInformer.Lister(),
-        // addressSpacesSynced: addressSpaceInformer.Informer().HasSynced,
+        addressSpaceLister:  addressSpaceInformer.Lister(),
+        addressSpacesSynced: addressSpaceInformer.Informer().HasSynced,
 
         workqueue:        workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "IoTProjects"),
         manage:           qdr.NewManage(),
@@ -117,7 +116,7 @@ func (c *Configurator) Run(threadiness int, stopCh <-chan struct{}) error {
     // prepare the caches
 
     klog.Info("Waiting for informer caches to sync")
-    if ok := cache.WaitForCacheSync(stopCh, c.projectsSynced /* FIXME: issue #2074: c.addressSpacesSynced */); !ok {
+    if ok := cache.WaitForCacheSync(stopCh, c.projectsSynced, c.addressSpacesSynced); !ok {
         return fmt.Errorf("failed to wait for caches to sync")
     }
 
