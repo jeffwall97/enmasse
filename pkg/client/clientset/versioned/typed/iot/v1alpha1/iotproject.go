@@ -26,6 +26,7 @@ type IoTProjectsGetter interface {
 type IoTProjectInterface interface {
 	Create(*v1alpha1.IoTProject) (*v1alpha1.IoTProject, error)
 	Update(*v1alpha1.IoTProject) (*v1alpha1.IoTProject, error)
+	UpdateStatus(*v1alpha1.IoTProject) (*v1alpha1.IoTProject, error)
 	Delete(name string, options *v1.DeleteOptions) error
 	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
 	Get(name string, options v1.GetOptions) (*v1alpha1.IoTProject, error)
@@ -103,6 +104,22 @@ func (c *ioTProjects) Update(ioTProject *v1alpha1.IoTProject) (result *v1alpha1.
 		Namespace(c.ns).
 		Resource("iotprojects").
 		Name(ioTProject.Name).
+		Body(ioTProject).
+		Do().
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *ioTProjects) UpdateStatus(ioTProject *v1alpha1.IoTProject) (result *v1alpha1.IoTProject, err error) {
+	result = &v1alpha1.IoTProject{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("iotprojects").
+		Name(ioTProject.Name).
+		SubResource("status").
 		Body(ioTProject).
 		Do().
 		Into(result)

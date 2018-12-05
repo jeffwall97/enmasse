@@ -16,11 +16,20 @@ type IoTProject struct {
     metav1.TypeMeta   `json:",inline"`
     metav1.ObjectMeta `json:"metadata,omitempty"`
 
-    Spec IoTProjectSpec `json:"spec"`
+    Spec   IoTProjectSpec   `json:"spec"`
+    Status IoTProjectStatus `json:"status"`
 }
 
 type IoTProjectSpec struct {
     DownstreamStrategy DownstreamStrategy `json:"downstreamStrategy"`
+}
+
+type IoTProjectStatus struct {
+    DownstreamEndpoint *DownstreamEndpointStatus `json:"downstreamEndpoint"`
+}
+
+type DownstreamEndpointStatus struct {
+    ExternalDownstreamStrategy `json:",inline"`
 }
 
 type DownstreamStrategy struct {

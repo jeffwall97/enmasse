@@ -5,10 +5,25 @@ metadata:
 spec:
   group: iot.enmasse.io
   version: v1alpha1
+  scope: Namespaced
   names:
     kind: IoTProject
     plural: iotprojects
     singular: iotproject
     shortNames:
     - itp
-  scope: Namespaced
+  subresources:
+    status: {}
+  additionalPrinterColumns:
+  - name: Downstream Host
+    type: string
+    description: The endpoint host name
+    JSONPath: .status.host
+  - name: Downstream Port
+    type: integer
+    description: The endpoint port number
+    JSONPath: .status.port
+  - name: TLS
+    type: boolean
+    description: If TLS is enabled
+    JSONPath: .status.tls
