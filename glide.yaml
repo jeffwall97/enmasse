@@ -8,8 +8,12 @@ import:
     version: ^1
 
   - package: k8s.io/code-generator
-    version: kubernetes-1.12.2
+    version: kubernetes-1.11.2
   - package: k8s.io/gengo
   - package: github.com/spf13/pflag
     version: ^1.0
   - package: golang.org/x/tools
+  - package: sigs.k8s.io/controller-runtime
+    version: ^0.1
+  - package: github.com/operator-framework/operator-sdk
+    version: ^0.2

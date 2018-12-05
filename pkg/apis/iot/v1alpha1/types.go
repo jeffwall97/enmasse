@@ -10,14 +10,15 @@ import (
 )
 
 // +genclient
+// +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type IoTProject struct {
     metav1.TypeMeta   `json:",inline"`
     metav1.ObjectMeta `json:"metadata,omitempty"`
 
-    Spec   IoTProjectSpec   `json:"spec"`
-    Status IoTProjectStatus `json:"status"`
+    Spec   IoTProjectSpec   `json:"spec,omitempty"`
+    Status IoTProjectStatus `json:"status,omitempty"`
 }
 
 type IoTProjectSpec struct {

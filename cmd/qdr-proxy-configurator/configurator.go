@@ -9,7 +9,6 @@ import (
     "fmt"
     "k8s.io/apimachinery/pkg/api/errors"
     "k8s.io/apimachinery/pkg/util/runtime"
-    utilruntime "k8s.io/apimachinery/pkg/util/runtime"
     "k8s.io/apimachinery/pkg/util/wait"
     "k8s.io/client-go/kubernetes"
     "k8s.io/client-go/kubernetes/scheme"
@@ -56,8 +55,6 @@ func NewConfigurator(
     ephermalCertBase string,
 ) *Configurator {
 
-    utilruntime.Must(enmassescheme.AddToScheme(scheme.Scheme))
-
     controller := &Configurator{
         kubeclientset:    kubeclientset,
         enmasseclientset: iotclientset,
@@ -72,6 +69,8 @@ func NewConfigurator(
         manage:           qdr.NewManage(),
         ephermalCertBase: ephermalCertBase,
     }
+
+    enmassescheme.AddToScheme(scheme.Scheme)
 
     klog.Info("Setting up event handlers")
 

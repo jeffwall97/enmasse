@@ -9,11 +9,10 @@ import (
     "flag"
     enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
     "github.com/enmasseproject/enmasse/pkg/signals"
-    "k8s.io/client-go/rest"
-    "os"
-
     "k8s.io/client-go/kubernetes"
+    "k8s.io/client-go/rest"
     "k8s.io/klog"
+    "os"
 
     "time"
 

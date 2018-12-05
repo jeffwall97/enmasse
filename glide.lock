@@ -1,12 +1,21 @@
-hash: 0e30d6e1903e9710a94015741883212d7e07c245fcc7c2c33f3251baf6923ed8
-updated: 2018-12-03T16:55:18.117142623+01:00
+hash: 794c10e5892016e880dff81240ab3f89349bd121bc470966251fb1ee714ee3b2
+updated: 2018-12-05T17:43:12.089657858+01:00
 imports:
+- name: cloud.google.com/go
+  version: 3b1ae45394a234c385be014e9a488f2bb6eef821
+  subpackages:
+  - compute/metadata
+  - internal
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
   subpackages:
   - spew
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+- name: github.com/go-logr/logr
+  version: 9fb12b3b21c5415d16ac18dc5cd42c1cfdd40c4e
+- name: github.com/go-logr/zapr
+  version: 7536572e8d55209135cd5e7ccf7fce43dca217ab
 - name: github.com/gogo/protobuf
   version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
   subpackages:
@@ -14,6 +23,10 @@ imports:
   - sortkeys
 - name: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
+- name: github.com/golang/groupcache
+  version: 02826c3e79038b59d737d3b1c0a1d937f71a4433
+  subpackages:
+  - lru
 - name: github.com/golang/protobuf
   version: b4deda0973fb4c70b50d226b1af49f3da59f5265
   subpackages:
@@ -40,12 +53,23 @@ imports:
   version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
   subpackages:
   - simplelru
+- name: github.com/imdario/mergo
+  version: 9316a62528ac99aaecb4e47eadd6dc8aa6533d58
 - name: github.com/json-iterator/go
   version: f2b4162afba35581b6d4a50d3b8f34e33c144682
+- name: github.com/mattbaird/jsonpatch
+  version: 81af80346b1a01caae0cbc27fd3c1ba5b11e189f
 - name: github.com/modern-go/concurrent
   version: bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94
 - name: github.com/modern-go/reflect2
   version: 05fbef0ca5da472bbf96c9322b84a53edc03c9fd
+- name: github.com/operator-framework/operator-sdk
+  version: 175a82edae514f57f597110af5447d3f9b1c0fc3
+  subpackages:
+  - pkg/k8sutil
+  - version
+- name: github.com/pborman/uuid
+  version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/spf13/pflag
@@ -54,6 +78,14 @@ imports:
   version: 1ea20fb1cbb1cc08cbd0d913a96dead89aa18289
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+- name: go.uber.org/zap
+  version: 67bc79d13d155c02fd008f721863ff8cc5f30659
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - zapcore
 - name: golang.org/x/crypto
   version: de0752318171da717af4ce24d0a2e8626afaeb11
   subpackages:
@@ -62,13 +94,11 @@ imports:
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
-  - html
-  - html/atom
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
   - lex/httplex
-  - websocket
 - name: golang.org/x/oauth2
   version: a6bd8cefa1811bd24b86f8902872e4e8225f74c4
   subpackages:
@@ -93,14 +123,16 @@ imports:
   subpackages:
   - rate
 - name: golang.org/x/tools
-  version: d0ca3933b724e6be513276cc2edb34e10d667438
+  version: 22934f0fdb6201c132a3dc6120150dcb1646d74c
 - name: google.golang.org/appengine
   version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
   - internal
+  - internal/app_identity
   - internal/base
   - internal/datastore
   - internal/log
+  - internal/modules
   - internal/remote_api
   - internal/urlfetch
   - urlfetch
@@ -111,6 +143,7 @@ imports:
 - name: k8s.io/api
   version: fd83cbc87e7632ccd8bbab63d2b673d4e0c631cc
   subpackages:
+  - admission/v1beta1
   - admissionregistration/v1alpha1
   - admissionregistration/v1beta1
   - apps/v1
@@ -131,7 +164,6 @@ imports:
   - core/v1
   - events/v1beta1
   - extensions/v1beta1
-  - imagepolicy/v1alpha1
   - networking/v1
   - policy/v1beta1
   - rbac/v1
@@ -180,6 +212,7 @@ imports:
   - pkg/util/runtime
   - pkg/util/sets
   - pkg/util/strategicpatch
+  - pkg/util/uuid
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
@@ -193,6 +226,7 @@ imports:
   subpackages:
   - discovery
   - discovery/fake
+  - dynamic
   - kubernetes
   - kubernetes/scheme
   - kubernetes/typed/admissionregistration/v1alpha1
@@ -231,24 +265,36 @@ imports:
   - pkg/apis/clientauthentication/v1beta1
   - pkg/version
   - plugin/pkg/client/auth/exec
+  - plugin/pkg/client/auth/gcp
   - rest
   - rest/watch
+  - restmapper
   - testing
+  - third_party/forked/golang/template
+  - tools/auth
   - tools/cache
+  - tools/clientcmd
   - tools/clientcmd/api
+  - tools/clientcmd/api/latest
+  - tools/clientcmd/api/v1
+  - tools/leaderelection
+  - tools/leaderelection/resourcelock
   - tools/metrics
   - tools/pager
+  - tools/record
   - tools/reference
   - transport
   - util/buffer
   - util/cert
   - util/connrotation
   - util/flowcontrol
+  - util/homedir
   - util/integer
+  - util/jsonpath
   - util/retry
   - util/workqueue
 - name: k8s.io/code-generator
-  version: 3dcf91f64f638563e5106f21f50c31fa361c918d
+  version: 6702109cc68eb6fe6350b83e14407c8d7309fd1a
 - name: k8s.io/gengo
   version: fd15ee9cc2f77baa4f31e59e6acbf21146455073
 - name: k8s.io/klog
@@ -257,4 +303,23 @@ imports:
   version: 0cf8f7e6ed1d2e3d47d02e3b6e559369af24d803
   subpackages:
   - pkg/util/proto
+- name: sigs.k8s.io/controller-runtime
+  version: 5fd1e9e9fac5261e9ad9d47c375afc014fc31d21
+  subpackages:
+  - pkg/cache
+  - pkg/cache/internal
+  - pkg/client
+  - pkg/client/apiutil
+  - pkg/client/config
+  - pkg/internal/recorder
+  - pkg/leaderelection
+  - pkg/manager
+  - pkg/patch
+  - pkg/recorder
+  - pkg/runtime/inject
+  - pkg/runtime/log
+  - pkg/runtime/signals
+  - pkg/webhook/admission
+  - pkg/webhook/admission/types
+  - pkg/webhook/types
 testImports: []

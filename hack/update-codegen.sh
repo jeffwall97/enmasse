@@ -12,7 +12,7 @@ set -o pipefail
 SCRIPTPATH="$(cd "$(dirname "$0")" && pwd -P)"
 GENERATOR_BASE=${SCRIPTPATH}/../vendor/k8s.io/code-generator
 
-"$GENERATOR_BASE/generate-groups.sh" "deepcopy,client,informer,lister" \
+"$GENERATOR_BASE/generate-groups.sh" "all" \
     github.com/enmasseproject/enmasse/pkg/client \
     github.com/enmasseproject/enmasse/pkg/apis \
     "enmasse:v1alpha1 iot:v1alpha1" \
