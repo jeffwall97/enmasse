@@ -1,6 +1,10 @@
 enmasse:
   iot:
 
+    auth:
+      validation:
+        sharedSecret: 1234567890123456789012345678901234567890123456789012345678901234
+
     tenant:
 
       endpoint:
