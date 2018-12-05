@@ -25,8 +25,6 @@ spec:
         value: -pl io.enmasse:tenant-service --also-make
       - name: ARTIFACT_DIR
         value: iot/tenant-service/target
-      - name: ARTIFACT_COPY_ARGS
-        value: "*.jar"
   output:
     to:
       kind: ImageStreamTag
