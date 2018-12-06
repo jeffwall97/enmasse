@@ -13,7 +13,6 @@ import (
 
     v1alpha1iot "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
     "github.com/enmasseproject/enmasse/pkg/controller"
-    "github.com/operator-framework/operator-sdk/pkg/k8sutil"
     sdkVersion "github.com/operator-framework/operator-sdk/version"
     _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
     "sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -37,11 +36,13 @@ func main() {
 
     printVersion()
 
+    /*
     namespace, err := k8sutil.GetWatchNamespace()
     if err != nil {
         log.Error(err, "failed to get watch namespace")
         os.Exit(1)
     }
+    */
 
     cfg, err := config.GetConfig()
     if err != nil {
@@ -49,7 +50,7 @@ func main() {
         os.Exit(1)
     }
 
-    mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
+    mgr, err := manager.New(cfg, manager.Options{Namespace: "" /*NOTE: watching all namespaces*/ })
     if err != nil {
         log.Error(err, "")
         os.Exit(1)
