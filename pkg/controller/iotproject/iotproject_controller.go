@@ -7,6 +7,8 @@ package iotproject
 
 import (
     "context"
+    "encoding/json"
+    "fmt"
 
     iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
     corev1 "k8s.io/api/core/v1"
@@ -72,10 +74,10 @@ func (r *ReconcileIoTProject) updateProjectStatusReady(ctx context.Context, requ
     newProject := project.DeepCopy()
 
     newProject.Status.IsReady = true
-    if newProject.Status.DownstreamEndpoint == nil {
-        newProject.Status.DownstreamEndpoint = new(iotv1alpha1.DownstreamEndpointStatus)
-    }
-    newProject.Status.DownstreamEndpoint.Information = *(endpointStatus.DeepCopy())
+    newProject.Status.DownstreamEndpoint = endpointStatus.DeepCopy()
+
+    data, _ := json.Marshal(newProject)
+    fmt.Println(string(data))
 
     return r.client.Update(ctx, newProject)
 }

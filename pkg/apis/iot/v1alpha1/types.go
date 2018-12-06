@@ -17,8 +17,8 @@ type IoTProject struct {
     metav1.TypeMeta   `json:",inline"`
     metav1.ObjectMeta `json:"metadata,omitempty"`
 
-    Spec   IoTProjectSpec   `json:"spec,omitempty"`
-    Status IoTProjectStatus `json:"status,omitempty"`
+    Spec   IoTProjectSpec   `json:"spec"`
+    Status IoTProjectStatus `json:"status"`
 }
 
 type IoTProjectSpec struct {
@@ -26,12 +26,8 @@ type IoTProjectSpec struct {
 }
 
 type IoTProjectStatus struct {
-    IsReady            bool                      `json:"isReady"`
-    DownstreamEndpoint *DownstreamEndpointStatus `json:"downstreamEndpoint"`
-}
-
-type DownstreamEndpointStatus struct {
-    Information ExternalDownstreamStrategy `json:",inline"`
+    IsReady            bool                        `json:"isReady"`
+    DownstreamEndpoint *ExternalDownstreamStrategy `json:"downstreamEndpoint,omitempty"`
 }
 
 type DownstreamStrategy struct {

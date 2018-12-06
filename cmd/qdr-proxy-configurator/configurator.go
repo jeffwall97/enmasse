@@ -231,15 +231,13 @@ func (c *Configurator) syncHandler(key string) error {
         return err
     }
 
-    if project.Spec.DownstreamStrategy.ExternalDownstreamStrategy != nil {
-        // sync add or update
-        _, err = c.syncProjectExternalDownstream(project)
-    } else if project.Spec.DownstreamStrategy.ProvidedDownstreamStrategy != nil {
-        // sync add or update
-        _, err = c.syncProjectProvidedDownstream(project)
-    } else {
-        klog.Warning("Unknown downstream type. Skipping...")
+    if !project.Status.IsReady || project.Status.DownstreamEndpoint == nil {
+        // project is not ready yet
+        return nil
     }
+
+    // sync add or update
+    _, err = c.syncProject(project)
 
     // something went wrong syncing the project
     // we will re-queue this by returning the error state
