@@ -55,6 +55,8 @@ func NewConfigurator(
     ephermalCertBase string,
 ) *Configurator {
 
+    enmassescheme.AddToScheme(scheme.Scheme)
+
     controller := &Configurator{
         kubeclientset:    kubeclientset,
         enmasseclientset: iotclientset,
@@ -69,8 +71,6 @@ func NewConfigurator(
         manage:           qdr.NewManage(),
         ephermalCertBase: ephermalCertBase,
     }
-
-    enmassescheme.AddToScheme(scheme.Scheme)
 
     klog.Info("Setting up event handlers")
 
