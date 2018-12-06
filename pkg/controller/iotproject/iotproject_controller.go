@@ -64,7 +64,7 @@ func (r *ReconcileIoTProject) updateProjectStatusError(ctx context.Context, requ
     newProject.Status.IsReady = false
     newProject.Status.DownstreamEndpoint = nil
 
-    return r.client.Update(ctx, newProject)
+    return r.client.Status().Update(ctx, newProject)
 }
 
 func (r *ReconcileIoTProject) updateProjectStatusReady(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject, endpointStatus *iotv1alpha1.ExternalDownstreamStrategy) error {
