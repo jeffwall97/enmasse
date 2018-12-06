@@ -1,7 +1,7 @@
 package: github.com/enmasseproject/enmasse
 import:
   - package: k8s.io/client-go
-    version: ^9
+    version: ^8
   - package: go.uber.org/multierr
     version: ^1.1
   - package: go.uber.org/atomic

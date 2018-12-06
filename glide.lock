@@ -1,5 +1,5 @@
-hash: 794c10e5892016e880dff81240ab3f89349bd121bc470966251fb1ee714ee3b2
-updated: 2018-12-05T17:43:12.089657858+01:00
+hash: 2ee258b570ed0a7db0ea1608b4164bca6c61b0dabcb49fa09162c55030d75f19
+updated: 2018-12-06T08:44:39.12354517+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -54,7 +54,7 @@ imports:
   subpackages:
   - simplelru
 - name: github.com/imdario/mergo
-  version: 9316a62528ac99aaecb4e47eadd6dc8aa6533d58
+  version: 6633656539c1639d9d78127b7d47c622b5d7b6dc
 - name: github.com/json-iterator/go
   version: f2b4162afba35581b6d4a50d3b8f34e33c144682
 - name: github.com/mattbaird/jsonpatch
@@ -87,7 +87,7 @@ imports:
   - internal/exit
   - zapcore
 - name: golang.org/x/crypto
-  version: de0752318171da717af4ce24d0a2e8626afaeb11
+  version: 49796115aa4b964c318aad4f3084fdb41e9aa067
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
@@ -123,7 +123,7 @@ imports:
   subpackages:
   - rate
 - name: golang.org/x/tools
-  version: 22934f0fdb6201c132a3dc6120150dcb1646d74c
+  version: 3576414c54a492fc48cd913814eb209914c717f0
 - name: google.golang.org/appengine
   version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
@@ -141,7 +141,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 670d4cfef0544295bc27a114dbac37980d83185a
 - name: k8s.io/api
-  version: fd83cbc87e7632ccd8bbab63d2b673d4e0c631cc
+  version: 072894a440bdee3a891dea811fe42902311cd2a3
   subpackages:
   - admission/v1beta1
   - admissionregistration/v1alpha1
@@ -155,12 +155,10 @@ imports:
   - authorization/v1beta1
   - autoscaling/v1
   - autoscaling/v2beta1
-  - autoscaling/v2beta2
   - batch/v1
   - batch/v1beta1
   - batch/v2alpha1
   - certificates/v1beta1
-  - coordination/v1beta1
   - core/v1
   - events/v1beta1
   - extensions/v1beta1
@@ -176,7 +174,7 @@ imports:
   - storage/v1alpha1
   - storage/v1beta1
 - name: k8s.io/apimachinery
-  version: 6dd46049f39503a1fc8d65de4bd566829e95faff
+  version: 103fd098999dc9c0c88536f5c9ad2e5da39373ae
   subpackages:
   - pkg/api/errors
   - pkg/api/meta
@@ -207,7 +205,6 @@ imports:
   - pkg/util/intstr
   - pkg/util/json
   - pkg/util/mergepatch
-  - pkg/util/naming
   - pkg/util/net
   - pkg/util/runtime
   - pkg/util/sets
@@ -222,7 +219,7 @@ imports:
   - third_party/forked/golang/json
   - third_party/forked/golang/reflect
 - name: k8s.io/client-go
-  version: 1638f8970cefaa404ff3a62950f88b08292b2696
+  version: 7d04d0e2a0a1a4d4a1cd6baa432a2301492e4e65
   subpackages:
   - discovery
   - discovery/fake
@@ -240,12 +237,10 @@ imports:
   - kubernetes/typed/authorization/v1beta1
   - kubernetes/typed/autoscaling/v1
   - kubernetes/typed/autoscaling/v2beta1
-  - kubernetes/typed/autoscaling/v2beta2
   - kubernetes/typed/batch/v1
   - kubernetes/typed/batch/v1beta1
   - kubernetes/typed/batch/v2alpha1
   - kubernetes/typed/certificates/v1beta1
-  - kubernetes/typed/coordination/v1beta1
   - kubernetes/typed/core/v1
   - kubernetes/typed/events/v1beta1
   - kubernetes/typed/extensions/v1beta1
@@ -300,7 +295,7 @@ imports:
 - name: k8s.io/klog
   version: 8139d8cb77af419532b33dfa7dd09fbc5f1d344f
 - name: k8s.io/kube-openapi
-  version: 0cf8f7e6ed1d2e3d47d02e3b6e559369af24d803
+  version: 91cfa479c814065e420cee7ed227db0f63a5854e
   subpackages:
   - pkg/util/proto
 - name: sigs.k8s.io/controller-runtime
@@ -311,14 +306,23 @@ imports:
   - pkg/client
   - pkg/client/apiutil
   - pkg/client/config
+  - pkg/controller
+  - pkg/controller/controllerutil
+  - pkg/event
+  - pkg/handler
+  - pkg/internal/controller
   - pkg/internal/recorder
   - pkg/leaderelection
   - pkg/manager
   - pkg/patch
+  - pkg/predicate
+  - pkg/reconcile
   - pkg/recorder
   - pkg/runtime/inject
   - pkg/runtime/log
   - pkg/runtime/signals
+  - pkg/source
+  - pkg/source/internal
   - pkg/webhook/admission
   - pkg/webhook/admission/types
   - pkg/webhook/types
