@@ -35,8 +35,8 @@ type DownstreamEndpointStatus struct {
 }
 
 type DownstreamStrategy struct {
-    ExternalDownstreamStrategy *ExternalDownstreamStrategy `json:"externalStrategy"`
-    ProvidedDownstreamStrategy *ProvidedDownstreamStrategy `json:"providedStrategy"`
+    ExternalDownstreamStrategy *ExternalDownstreamStrategy `json:"externalStrategy,omitempty"`
+    ProvidedDownstreamStrategy *ProvidedDownstreamStrategy `json:"providedStrategy,omitempty"`
 }
 
 type ProvidedDownstreamStrategy struct {
