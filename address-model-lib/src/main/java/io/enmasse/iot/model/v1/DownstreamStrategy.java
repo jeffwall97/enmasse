@@ -5,6 +5,10 @@
 
 package io.enmasse.iot.model.v1;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+//FIXME: remove ignore annotation
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DownstreamStrategy {
 
     private ExternalDownstreamStrategy externalStrategy;

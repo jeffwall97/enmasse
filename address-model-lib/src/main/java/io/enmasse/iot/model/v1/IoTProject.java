@@ -5,6 +5,8 @@
 
 package io.enmasse.iot.model.v1;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.sundr.builder.annotations.Buildable;
@@ -22,6 +24,8 @@ import io.sundr.builder.annotations.Inline;
         )
 @ApiVersion("v1alpha1")
 @CustomResource(group = "iot.enmasse.io")
+//FIXME: remove ignore annotation
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IoTProject extends AbstractHasMetadata<IoTProject> {
 
     private static final long serialVersionUID = 1L;
