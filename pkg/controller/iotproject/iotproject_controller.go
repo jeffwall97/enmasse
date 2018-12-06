@@ -299,15 +299,13 @@ func isTls(
     }
 
     if endpointStatus.Certificate != nil {
+        // if there is a certificate, enable tls
         return true, nil
     }
 
     if endpoint.Expose != nil {
-        switch endpoint.Expose.RouteTlsTermination {
-        case "reencrypt":
-        case "edge":
-            return true, nil
-        }
+        // anything set as tls termination counts as tls enabled = true
+        return len(endpoint.Expose.RouteTlsTermination) > 0, nil
     }
 
     return false, nil
