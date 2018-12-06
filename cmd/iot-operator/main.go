@@ -8,7 +8,8 @@ package main
 import (
     "flag"
     "fmt"
-    "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
+    enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
+    "k8s.io/client-go/kubernetes/scheme"
     "os"
     "runtime"
 
@@ -60,7 +61,8 @@ func main() {
 
     // register APIs
 
-    scheme.AddToScheme(mgr.GetScheme())
+    enmassescheme.AddToScheme(scheme.Scheme)
+    enmassescheme.AddToScheme(mgr.GetScheme())
 
     // register controller
 

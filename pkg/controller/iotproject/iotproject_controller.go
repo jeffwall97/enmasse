@@ -10,10 +10,13 @@ import (
     "fmt"
     enmassealpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
     iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
+    enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
     "k8s.io/apimachinery/pkg/api/errors"
+    "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/apimachinery/pkg/runtime"
-    "k8s.io/apimachinery/pkg/types"
+    "k8s.io/klog"
     "sigs.k8s.io/controller-runtime/pkg/client"
+    "sigs.k8s.io/controller-runtime/pkg/client/config"
     "sigs.k8s.io/controller-runtime/pkg/controller"
     "sigs.k8s.io/controller-runtime/pkg/handler"
     "sigs.k8s.io/controller-runtime/pkg/manager"
@@ -34,11 +37,23 @@ func Add(mgr manager.Manager) error {
     return add(mgr, newReconciler(mgr))
 }
 
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-    return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+func newReconciler(mgr manager.Manager) *ReconcileIoTProject {
+
+    cfg, err := config.GetConfig()
+    if err != nil {
+        klog.Fatalf("Error getting in-cluster config: %v", err.Error())
+    }
+
+    clientset, err := enmasse.NewForConfig(cfg)
+    if err != nil {
+        klog.Fatalf("Error building EnMasse client: t%v", err.Error())
+    }
+
+    return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme(), enmasseclientset: clientset}
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
+func add(mgr manager.Manager, r *ReconcileIoTProject) error {
+
     // Create a new controller
     c, err := controller.New("iotproject-controller", mgr, controller.Options{Reconciler: r})
     if err != nil {
@@ -51,8 +66,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
         return err
     }
 
-    gvk := enmassealpha1.SchemeGroupVersion.WithKind("AddressSpace")
-    ls := NewListerSource(30*time.Second, gvk, mgr.GetClient())
+    ls := NewListerSource(30*time.Second, r.enmasseclientset)
     err = c.Watch(&ls, &handler.EnqueueRequestForObject{})
     if err != nil {
         return err
@@ -68,6 +82,8 @@ type ReconcileIoTProject struct {
     // that reads objects from the cache and writes to the apiserver
     client client.Client
     scheme *runtime.Scheme
+
+    enmasseclientset *enmasse.Clientset
 }
 
 func (r *ReconcileIoTProject) updateProjectStatusError(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) error {
@@ -182,8 +198,11 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
         return nil, fmt.Errorf("missing address space name")
     }
 
-    addressSpace := &enmassealpha1.AddressSpace{}
-    err := r.client.Get(ctx, types.NamespacedName{Namespace: strategy.Namespace, Name: strategy.AddressSpaceName}, addressSpace)
+    // FIXME: use cached version, when enmasse#1280 is fixed
+    // addressSpace := &enmassealpha1.AddressSpace{}
+    // err := r.client.Get(ctx, types.NamespacedName{Namespace: strategy.Namespace, Name: strategy.AddressSpaceName}, addressSpace)
+
+    addressSpace, err := r.enmasseclientset.EnmasseV1alpha1().AddressSpaces(strategy.Namespace).Get(strategy.AddressSpaceName, v1.GetOptions{})
     if err != nil {
         log.WithValues("namespace", strategy.Namespace, "name", strategy.AddressSpaceName).Info("Failed to get address space")
         return nil, err
