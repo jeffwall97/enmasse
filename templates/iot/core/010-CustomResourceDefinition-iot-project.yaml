@@ -18,12 +18,12 @@ spec:
   - name: Downstream Host
     type: string
     description: The endpoint host name
-    JSONPath: .status.host
+    JSONPath: .status.downstreamEndpoint.host
   - name: Downstream Port
     type: integer
     description: The endpoint port number
-    JSONPath: .status.port
+    JSONPath: .status.downstreamEndpoint.port
   - name: TLS
     type: boolean
     description: If TLS is enabled
-    JSONPath: .status.tls
+    JSONPath: .status.downstreamEndpoint.tls

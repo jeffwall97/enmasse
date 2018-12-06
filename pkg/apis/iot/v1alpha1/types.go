@@ -10,7 +10,6 @@ import (
 )
 
 // +genclient
-// +k8s:openapi-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type IoTProject struct {
@@ -28,6 +27,8 @@ type IoTProjectSpec struct {
 type IoTProjectStatus struct {
     IsReady            bool                        `json:"isReady"`
     DownstreamEndpoint *ExternalDownstreamStrategy `json:"downstreamEndpoint,omitempty"`
+
+    // FIXME: add conditions
 }
 
 type DownstreamStrategy struct {
@@ -39,11 +40,12 @@ type ProvidedDownstreamStrategy struct {
     Namespace        string `json:"namespace"`
     AddressSpaceName string `json:"addressSpaceName"`
 
-    EndpointMode EndpointMode `json:"endpointMode"`
-    EndpointName string       `json:"endpointName"`
-    PortName     string       `json:"portName"`
-
     Credentials `json:",inline"`
+
+    EndpointMode *EndpointMode `json:"endpointMode,omitempty"`
+    EndpointName string        `json:"endpointName,omitempty"`
+    PortName     string        `json:"portName"`
+    DisableTLS   bool          `json:"disableTls"`
 }
 
 type ExternalDownstreamStrategy struct {

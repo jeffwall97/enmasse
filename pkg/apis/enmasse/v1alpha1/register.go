@@ -6,15 +6,15 @@
 package v1alpha1
 
 import (
+    "github.com/enmasseproject/enmasse/pkg/apis/enmasse"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/apimachinery/pkg/runtime"
     "k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-const GroupName = "enmasse.io"
 const GroupVersion = "v1alpha1"
 
-var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: GroupVersion}
+var SchemeGroupVersion = schema.GroupVersion{Group: enmasse.GroupName, Version: GroupVersion}
 
 func Kind(kind string) schema.GroupKind {
     return SchemeGroupVersion.WithKind(kind).GroupKind()

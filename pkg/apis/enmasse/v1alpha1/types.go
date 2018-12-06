@@ -28,8 +28,20 @@ type AddressSpaceSpec struct {
 }
 
 type EndpointSpec struct {
-    Name    string `json:"name"`
-    Service string `json:"service"`
+    Name        string           `json:"name"`
+    Service     string           `json:"service"`
+    Certificate *CertificateSpec `json:"cert,omitempty"`
+    Expose      *ExposeSpec      `json:"expose,omitempty"`
+}
+
+type CertificateSpec struct {
+    Provider string `json:"provider"`
+}
+
+type ExposeSpec struct {
+    Type                string `json:"route"`
+    RouteServicePort    string `json:"routeServicePort"`
+    RouteTlsTermination string `json:"routeTlsTermination"`
 }
 
 type AddressSpaceStatus struct {
@@ -50,8 +62,8 @@ type EndpointStatus struct {
 }
 
 type Port struct {
-    Name string
-    Port uint16
+    Name string `json:"name"`
+    Port uint16 `json:"port"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

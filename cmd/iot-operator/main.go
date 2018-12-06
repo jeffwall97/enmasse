@@ -8,10 +8,10 @@ package main
 import (
     "flag"
     "fmt"
+    "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
     "os"
     "runtime"
 
-    v1alpha1iot "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
     "github.com/enmasseproject/enmasse/pkg/controller"
     sdkVersion "github.com/operator-framework/operator-sdk/version"
     _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -46,7 +46,7 @@ func main() {
 
     cfg, err := config.GetConfig()
     if err != nil {
-        log.Error(err, "")
+        log.Error(err, "Failed to get configuration")
         os.Exit(1)
     }
 
@@ -56,19 +56,20 @@ func main() {
         os.Exit(1)
     }
 
-    log.Info("Registering Components.")
+    log.Info("Registering components...")
 
-    if err := v1alpha1iot.AddToScheme(mgr.GetScheme()); err != nil {
-        log.Error(err, "")
-        os.Exit(1)
-    }
+    // register APIs
+
+    scheme.AddToScheme(mgr.GetScheme())
+
+    // register controller
 
     if err := controller.AddToManager(mgr); err != nil {
-        log.Error(err, "")
+        log.Error(err, "Failed to register controller")
         os.Exit(1)
     }
 
-    log.Info("Starting the Cmd.")
+    log.Info("Starting the operator")
 
     if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
         log.Error(err, "manager exited non-zero")
