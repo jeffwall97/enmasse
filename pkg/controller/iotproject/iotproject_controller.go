@@ -180,15 +180,19 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
 
     strategy := project.Spec.DownstreamStrategy.ProvidedDownstreamStrategy
 
-    if len(strategy.EndpointName) == 0 {
-        strategy.EndpointName = DefaultEndpointName
+    endpointName := strategy.EndpointName
+    if len(endpointName) == 0 {
+        endpointName = DefaultEndpointName
     }
-    if len(strategy.PortName) == 0 {
-        strategy.PortName = DefaultPortName
+    portName := strategy.PortName
+    if len(portName) == 0 {
+        portName = DefaultPortName
     }
-    if strategy.EndpointMode == nil {
-        c := DefaultEndpointMode
-        strategy.EndpointMode = &c
+    var endpointMode iotv1alpha1.EndpointMode
+    if strategy.EndpointMode != nil {
+        endpointMode = *strategy.EndpointMode
+    } else {
+        endpointMode = DefaultEndpointMode
     }
 
     if len(strategy.Namespace) == 0 {
@@ -197,6 +201,11 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
     if len(strategy.AddressSpaceName) == 0 {
         return nil, fmt.Errorf("missing address space name")
     }
+
+    return r.processProvided(strategy, endpointMode, endpointName, portName)
+}
+
+func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDownstreamStrategy, endpointMode iotv1alpha1.EndpointMode, endpointName string, portName string) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
 
     // FIXME: use cached version, when enmasse#1280 is fixed
     // addressSpace := &enmassealpha1.AddressSpace{}
@@ -209,9 +218,8 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
     }
 
     if !addressSpace.Status.IsReady {
-        err = r.updateProjectStatusError(ctx, request, project)
         // not ready, yet … wait
-        return nil, err
+        return nil, fmt.Errorf("address space is not ready yet")
     }
 
     endpoint := new(iotv1alpha1.ExternalDownstreamStrategy)
@@ -220,7 +228,7 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
 
     foundEndpoint := false
     for _, es := range addressSpace.Status.EndpointStatus {
-        if es.Name != strategy.EndpointName {
+        if es.Name != endpointName {
             continue
         }
 
@@ -228,7 +236,7 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
 
         var ports []enmassealpha1.Port
 
-        switch *strategy.EndpointMode {
+        switch endpointMode {
         case iotv1alpha1.Service:
             endpoint.Host = es.ServiceHost
             ports = es.ServicePorts
@@ -243,29 +251,28 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
 
         foundPort := false
         for _, port := range ports {
-            if port.Name == strategy.PortName {
+            if port.Name == portName {
                 foundPort = true
 
                 endpoint.Port = port.Port
 
                 tls, err := isTls(addressSpace, &es, &port, strategy)
                 if err != nil {
-                    endpoint.TLS = tls
-                } else {
                     return nil, err
                 }
+                endpoint.TLS = tls
 
             }
         }
 
         if !foundPort {
-            return nil, fmt.Errorf("unable to find port: %s for endpoint: %s", strategy.PortName, strategy.EndpointName)
+            return nil, fmt.Errorf("unable to find port: %s for endpoint: %s", portName, endpointName)
         }
 
     }
 
     if !foundEndpoint {
-        return nil, fmt.Errorf("unable to find endpoint: %s", strategy.EndpointName)
+        return nil, fmt.Errorf("unable to find endpoint: %s", endpointName)
     }
 
     return endpoint, nil
@@ -287,7 +294,7 @@ func isTls(
     port *enmassealpha1.Port,
     strategy *iotv1alpha1.ProvidedDownstreamStrategy) (bool, error) {
 
-    if strategy.DisableTLS {
+    if strategy.DisableTLS != nil && *strategy.DisableTLS {
         // TLS is forced off
         return false, nil
     }

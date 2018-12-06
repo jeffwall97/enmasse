@@ -34,9 +34,22 @@ type IoTProjectStatus struct {
 type DownstreamStrategy struct {
     ExternalDownstreamStrategy *ExternalDownstreamStrategy `json:"externalStrategy,omitempty"`
     ProvidedDownstreamStrategy *ProvidedDownstreamStrategy `json:"providedStrategy,omitempty"`
+    ManagedDownstreamStrategy  *ManagedDownstreamStrategy  `json:"managedStrategy,omitempty"`
 }
 
 type ProvidedDownstreamStrategy struct {
+    Namespace        string `json:"namespace"`
+    AddressSpaceName string `json:"addressSpaceName"`
+
+    Credentials `json:",inline"`
+
+    EndpointMode *EndpointMode `json:"endpointMode,omitempty"`
+    EndpointName string        `json:"endpointName,omitempty"`
+    PortName     string        `json:"portName,omitempty"`
+    DisableTLS   *bool         `json:"disableTls,omitempty"`
+}
+
+type ManagedDownstreamStrategy struct {
     Namespace        string `json:"namespace"`
     AddressSpaceName string `json:"addressSpaceName"`
 
