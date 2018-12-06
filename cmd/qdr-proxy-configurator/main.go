@@ -91,7 +91,6 @@ func main() {
     configurator := NewConfigurator(
         kubeClient, enmasseClient,
         enmasseInformerFactory.Iot().V1alpha1().IoTProjects(),
-        enmasseInformerFactory.Enmasse().V1alpha1().AddressSpaces(),
         ephermalCertBase,
     )
 

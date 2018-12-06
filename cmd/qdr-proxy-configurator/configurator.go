@@ -19,10 +19,8 @@ import (
 
     clientset "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
     enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
-    coreinformers "github.com/enmasseproject/enmasse/pkg/client/informers/externalversions/enmasse/v1alpha1"
     iotinformers "github.com/enmasseproject/enmasse/pkg/client/informers/externalversions/iot/v1alpha1"
 
-    corelisters "github.com/enmasseproject/enmasse/pkg/client/listers/enmasse/v1alpha1"
     iotlisters "github.com/enmasseproject/enmasse/pkg/client/listers/iot/v1alpha1"
 
     "github.com/enmasseproject/enmasse/pkg/qdr"
@@ -39,9 +37,6 @@ type Configurator struct {
     projectLister  iotlisters.IoTProjectLister
     projectsSynced cache.InformerSynced
 
-    addressSpaceLister  corelisters.AddressSpaceLister
-    addressSpacesSynced cache.InformerSynced
-
     workqueue workqueue.RateLimitingInterface
 
     manage *qdr.Manage
@@ -51,7 +46,6 @@ func NewConfigurator(
     kubeclientset kubernetes.Interface,
     iotclientset clientset.Interface,
     projectInformer iotinformers.IoTProjectInformer,
-    addressSpaceInformer coreinformers.AddressSpaceInformer,
     ephermalCertBase string,
 ) *Configurator {
 
@@ -63,9 +57,6 @@ func NewConfigurator(
 
         projectLister:  projectInformer.Lister(),
         projectsSynced: projectInformer.Informer().HasSynced,
-
-        addressSpaceLister:  addressSpaceInformer.Lister(),
-        addressSpacesSynced: addressSpaceInformer.Informer().HasSynced,
 
         workqueue:        workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "IoTProjects"),
         manage:           qdr.NewManage(),
@@ -115,7 +106,7 @@ func (c *Configurator) Run(threadiness int, stopCh <-chan struct{}) error {
     // prepare the caches
 
     klog.Info("Waiting for informer caches to sync")
-    if ok := cache.WaitForCacheSync(stopCh, c.projectsSynced, c.addressSpacesSynced); !ok {
+    if ok := cache.WaitForCacheSync(stopCh, c.projectsSynced); !ok {
         return fmt.Errorf("failed to wait for caches to sync")
     }
 
