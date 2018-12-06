@@ -62,6 +62,7 @@ func (r *ReconcileIoTProject) updateProjectStatusError(ctx context.Context, requ
 
     newProject := project.DeepCopy()
     newProject.Status.IsReady = false
+    newProject.Status.DownstreamEndpoint = nil
 
     return r.client.Update(ctx, newProject)
 }
@@ -71,7 +72,10 @@ func (r *ReconcileIoTProject) updateProjectStatusReady(ctx context.Context, requ
     newProject := project.DeepCopy()
 
     newProject.Status.IsReady = true
-    endpointStatus.DeepCopyInto(&newProject.Status.DownstreamEndpoint.Information)
+    if newProject.Status.DownstreamEndpoint == nil {
+        newProject.Status.DownstreamEndpoint = new(iotv1alpha1.DownstreamEndpointStatus)
+    }
+    newProject.Status.DownstreamEndpoint.Information = *(endpointStatus.DeepCopy())
 
     return r.client.Update(ctx, newProject)
 }
@@ -86,6 +90,7 @@ func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Re
     // Get project
     project := &iotv1alpha1.IoTProject{}
     err := r.client.Get(context.TODO(), request.NamespacedName, project)
+
     if err != nil {
         if errors.IsNotFound(err) {
             // Request object not found, could have been deleted after reconcile request.
@@ -127,33 +132,33 @@ func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Re
 
     /*
 
-    // Define a new Pod object
-    pod := newPodForCR(instance)
+       // Define a new Pod object
+       pod := newPodForCR(instance)
 
-    // Set IoTProject instance as the owner and controller
-    if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
-        return reconcile.Result{}, err
-    }
+       // Set IoTProject instance as the owner and controller
+       if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
+           return reconcile.Result{}, err
+       }
 
-    // Check if this Pod already exists
-    found := &corev1.Pod{}
-    err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
-    if err != nil && errors.IsNotFound(err) {
-        reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-        err = r.client.Create(context.TODO(), pod)
-        if err != nil {
-            return reconcile.Result{}, err
-        }
+       // Check if this Pod already exists
+       found := &corev1.Pod{}
+       err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
+       if err != nil && errors.IsNotFound(err) {
+           reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
+           err = r.client.Create(context.TODO(), pod)
+           if err != nil {
+               return reconcile.Result{}, err
+           }
 
-        // Pod created successfully - don't requeue
-        return reconcile.Result{}, nil
-    } else if err != nil {
-        return reconcile.Result{}, err
-    }
+           // Pod created successfully - don't requeue
+           return reconcile.Result{}, nil
+       } else if err != nil {
+           return reconcile.Result{}, err
+       }
 
-    // Pod already exists - don't requeue
-    reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
-    return reconcile.Result{}, nil
+       // Pod already exists - don't requeue
+       reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+       return reconcile.Result{}, nil
     */
 }
 
