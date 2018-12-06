@@ -8,7 +8,6 @@ package main
 import (
     "flag"
     enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
-    "github.com/enmasseproject/enmasse/pkg/signals"
     "k8s.io/client-go/kubernetes"
     "k8s.io/client-go/rest"
     "k8s.io/klog"
@@ -17,6 +16,8 @@ import (
     "time"
 
     informers "github.com/enmasseproject/enmasse/pkg/client/informers/externalversions"
+
+    "sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 var (
@@ -56,8 +57,7 @@ func main() {
     // init log system
     initLog()
 
-    // install signal handler for graceful shutdown, or hard exit
-    stopCh := signals.InstallSignalHandler()
+    stopCh := signals.SetupSignalHandler()
 
     klog.Infof("Starting up...")
 
