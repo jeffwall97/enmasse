@@ -10,6 +10,8 @@ import (
 )
 
 func init() {
-    // add ourself to the controller
+
+    // add ourselves to the list of controllers
+
     AddToManagerFuncs = append(AddToManagerFuncs, iotproject.Add)
 }

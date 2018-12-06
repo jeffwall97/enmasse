@@ -13,10 +13,8 @@ import (
     "k8s.io/apimachinery/pkg/api/errors"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/apimachinery/pkg/runtime"
-    "k8s.io/apimachinery/pkg/types"
     "sigs.k8s.io/controller-runtime/pkg/client"
     "sigs.k8s.io/controller-runtime/pkg/controller"
-    "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
     "sigs.k8s.io/controller-runtime/pkg/handler"
     "sigs.k8s.io/controller-runtime/pkg/manager"
     "sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -26,23 +24,15 @@ import (
 
 var log = logf.Log.WithName("controller_iotproject")
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
-// Add creates a new IoTProject Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
+// Gets called by parent "init", adding as to the manager
 func Add(mgr manager.Manager) error {
     return add(mgr, newReconciler(mgr))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
     return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
     // Create a new controller
     c, err := controller.New("iotproject-controller", mgr, controller.Options{Reconciler: r})
@@ -56,22 +46,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
         return err
     }
 
-    // TODO(user): Modify this to be the types you create that are owned by the primary resource
-    // Watch for changes to secondary resource Pods and requeue the owner IoTProject
-    err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-        IsController: true,
-        OwnerType:    &iotv1alpha1.IoTProject{},
-    })
-    if err != nil {
-        return err
-    }
-
     return nil
 }
 
 var _ reconcile.Reconciler = &ReconcileIoTProject{}
 
-// ReconcileIoTProject reconciles a IoTProject object
 type ReconcileIoTProject struct {
     // This client, initialized using mgr.Client() above, is a split client
     // that reads objects from the cache and writes to the apiserver
@@ -79,20 +58,34 @@ type ReconcileIoTProject struct {
     scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a IoTProject object and makes changes based on the state read
-// and what is in the IoTProject.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
+func (r *ReconcileIoTProject) updateProjectStatusError(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) error {
+
+    newProject := project.DeepCopy()
+    newProject.Status.IsReady = false
+
+    return r.client.Update(ctx, newProject)
+}
+
+func (r *ReconcileIoTProject) updateProjectStatusReady(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject, endpointStatus *iotv1alpha1.ExternalDownstreamStrategy) error {
+
+    newProject := project.DeepCopy()
+
+    newProject.Status.IsReady = true
+    endpointStatus.DeepCopyInto(&newProject.Status.DownstreamEndpoint.Information)
+
+    return r.client.Update(ctx, newProject)
+}
+
+// Reconcile by reading the IoT project spec and making required changes
+//
+// returning an error will get the request re-queued
 func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Result, error) {
     reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
     reqLogger.Info("Reconciling IoTProject")
 
-    // Fetch the IoTProject instance
-    instance := &iotv1alpha1.IoTProject{}
-    err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+    // Get project
+    project := &iotv1alpha1.IoTProject{}
+    err := r.client.Get(context.TODO(), request.NamespacedName, project)
     if err != nil {
         if errors.IsNotFound(err) {
             // Request object not found, could have been deleted after reconcile request.
@@ -103,6 +96,36 @@ func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Re
         // Error reading the object - requeue the request.
         return reconcile.Result{}, err
     }
+
+    if project.Spec.DownstreamStrategy.ExternalDownstreamStrategy != nil {
+
+        // handling as external
+
+        // we simply copy over the externally provided information
+
+        err = r.updateProjectStatusReady(context.TODO(), &request, project, project.Spec.DownstreamStrategy.ExternalDownstreamStrategy)
+        return reconcile.Result{}, err
+
+    } else if project.Spec.DownstreamStrategy.ProvidedDownstreamStrategy != nil {
+
+        // handling as provided
+
+        // FIXME: implement
+
+        return reconcile.Result{}, nil
+
+    } else {
+
+        // unknown strategy, we don't know how to handle this
+        // so re-queuing doesn't make any sense
+
+        err = r.updateProjectStatusError(context.TODO(), &request, project)
+
+        return reconcile.Result{}, err
+
+    }
+
+    /*
 
     // Define a new Pod object
     pod := newPodForCR(instance)
@@ -131,6 +154,7 @@ func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Re
     // Pod already exists - don't requeue
     reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
     return reconcile.Result{}, nil
+    */
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr

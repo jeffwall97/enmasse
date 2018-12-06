@@ -26,11 +26,12 @@ type IoTProjectSpec struct {
 }
 
 type IoTProjectStatus struct {
+    IsReady            bool                      `json:"isReady"`
     DownstreamEndpoint *DownstreamEndpointStatus `json:"downstreamEndpoint"`
 }
 
 type DownstreamEndpointStatus struct {
-    ExternalDownstreamStrategy `json:",inline"`
+    Information ExternalDownstreamStrategy `json:",inline"`
 }
 
 type DownstreamStrategy struct {
