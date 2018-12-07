@@ -52,13 +52,6 @@ type ProvidedDownstreamStrategy struct {
 type ManagedDownstreamStrategy struct {
     Namespace        string `json:"namespace"`
     AddressSpaceName string `json:"addressSpaceName"`
-
-    Credentials `json:",inline"`
-
-    EndpointMode *EndpointMode `json:"endpointMode,omitempty"`
-    EndpointName string        `json:"endpointName,omitempty"`
-    PortName     string        `json:"portName"`
-    DisableTLS   bool          `json:"disableTls"`
 }
 
 type ExternalDownstreamStrategy struct {
