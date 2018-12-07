@@ -46,7 +46,7 @@ type ProvidedDownstreamStrategy struct {
     EndpointMode *EndpointMode `json:"endpointMode,omitempty"`
     EndpointName string        `json:"endpointName,omitempty"`
     PortName     string        `json:"portName,omitempty"`
-    DisableTLS   *bool         `json:"disableTls,omitempty"`
+    TLS          *bool         `json:"tls,omitempty"`
 }
 
 type ManagedDownstreamStrategy struct {

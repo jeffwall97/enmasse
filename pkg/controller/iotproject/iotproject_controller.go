@@ -294,9 +294,8 @@ func isTls(
     port *enmassealpha1.Port,
     strategy *iotv1alpha1.ProvidedDownstreamStrategy) (bool, error) {
 
-    if strategy.DisableTLS != nil && *strategy.DisableTLS {
-        // TLS is forced off
-        return false, nil
+    if strategy.TLS != nil {
+        return *strategy.TLS, nil
     }
 
     endpoint := findEndpointSpec(addressSpace, endpointStatus)
