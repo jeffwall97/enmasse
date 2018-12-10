@@ -5,20 +5,20 @@ import (
 )
 
 type AuthenticationSpec struct {
-    Type string `json:"type"`
-    AdminSecretName string `json:"adminSecretName"`
+	Type            string `json:"type"`
+	AdminSecretName string `json:"adminSecretName"`
 }
 
 type MonitoringSpec struct {
-    Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled"`
 }
 
 // MessagingServiceSpec defines the desired state of MessagingService
 type MessagingServiceSpec struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-    Namespace string `json:"namespace,omitempty"`
-    Authentication []AuthenticationSpec `json:"authentication,omitempty"`
-    Monitoring     MonitoringSpec `json:"monitoring,omitempty"`
+	Namespace      string               `json:"namespace,omitempty"`
+	Authentication []AuthenticationSpec `json:"authentication,omitempty"`
+	Monitoring     MonitoringSpec       `json:"monitoring,omitempty"`
 }
 
 // MessagingServiceStatus defines the observed state of MessagingService

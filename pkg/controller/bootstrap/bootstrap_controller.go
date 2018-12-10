@@ -4,14 +4,18 @@ import (
 	"context"
 
 	adminv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/admin/enmasse/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	"io/ioutil"
+	appsv1 "k8s.io/api/apps/v1"
+	// corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/pkg/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	// "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"fmt"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -40,7 +44,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("messagingservice-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("bootstrap-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
@@ -51,12 +55,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner MessagingService
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+	// Watch for changes to secondary resource Deployments and requeue the owner MessagingService
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &adminv1alpha1.MessagingService{},
 	})
+
 	if err != nil {
 		return err
 	}
@@ -100,6 +104,11 @@ func (r *ReconcileMessagingService) Reconcile(request reconcile.Request) (reconc
 	}
 
 	// Define a new Pod object
+	err = applyAddressSpaceController(r.client, instance)
+	return reconcile.Result{}, err
+}
+
+/*
 	pod := newPodForCR(instance)
 
 	// Set MessagingService instance as the owner and controller
@@ -111,8 +120,7 @@ func (r *ReconcileMessagingService) Reconcile(request reconcile.Request) (reconc
 	found := &corev1.Pod{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-		err = r.client.Create(context.TODO(), pod)
+		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name) err = r.client.Create(context.TODO(), pod)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -149,4 +157,43 @@ func newPodForCR(cr *adminv1alpha1.MessagingService) *corev1.Pod {
 			},
 		},
 	}
+}
+*/
+
+func applyAddressSpaceController(client client.Client, cr *adminv1alpha1.MessagingService) error {
+	f, err := ioutil.ReadFile("/address-space-controller/050-Deployment-address-space-controller.yaml")
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+
+	decode := api.Codecs.UniversalDeserializer().Decode
+	obj, groupVersionKind, err := decode([]byte(f), nil, nil)
+
+	if (groupVersionKind != "Deployment") {
+		return error "Wrong deployment type";
+	}
+
+	deployment := obj
+
+	found := &appsv1.Deployment{}
+	err = client.Get(context.TODO(), types.NamespacedName{Name: "address-space-controller", Namespace: cr.Spec.Namespace}, found)
+
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new address space controller", "Deployment.Namespace", , "Pod.Name", pod.Name) err = r.client.Create(context.TODO(), pod)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// Pod created successfully - don't requeue
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Pod already exists - don't requeue
+	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+	return reconcile.Result{}, nil
+
+	return nil
 }
