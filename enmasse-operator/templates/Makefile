@@ -1,4 +1,4 @@
-include ../Makefile.common
+include ../../Makefile.common
 
 DOCKER_REGISTRY_PREFIX ?= $(DOCKER_REGISTRY)/
 IMAGE_VERSION 		   ?= $(TAG)
