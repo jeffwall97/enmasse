@@ -8,4 +8,5 @@ ENV VERSION=${version} COMMIT=${commit}
 
 USER nobody
 
+ADD templates/build/ /
 ADD enmasse-controller-manager /usr/local/bin/enmasse-controller-manager
