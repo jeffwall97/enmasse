@@ -1,10 +1,10 @@
 TOPDIR=$(dir $(lastword $(MAKEFILE_LIST)))
 include $(TOPDIR)/Makefile.env.mk
 BUILD_DIRS       = none-authservice
-DOCKER_DIRS	     = agent topic-forwarder artemis broker-plugin api-server address-space-controller standard-controller keycloak-plugin keycloak-controller router router-metrics mqtt-gateway mqtt-lwt service-broker hono-qdr-configurator
+DOCKER_DIRS	     = agent topic-forwarder artemis broker-plugin api-server address-space-controller standard-controller keycloak-plugin keycloak-controller router router-metrics mqtt-gateway mqtt-lwt service-broker iot/qdr-proxy-configurator
 FULL_BUILD 	     = true
 
-GO_TARGETS = hono-qdr-configurator/hono-qdr-configurator
+GO_TARGETS = iot/qdr-proxy-configurator/qdr-proxy-configurator
 DOCKER_TARGETS = docker_build docker_tag docker_push clean
 BUILD_TARGETS  = init build test package $(DOCKER_TARGETS) coverage
 INSTALLDIR=$(CURDIR)/templates/install
@@ -36,8 +36,8 @@ buildpush:
 
 build_go: $(GO_TARGETS)
 
-hono-qdr-configurator/hono-qdr-configurator:
-	cd cmd/hono-qdr-configurator && go build -o ../../$@ .
+iot/qdr-proxy-configurator/qdr-proxy-configurator:
+	cd cmd/qdr-proxy-configurator && go build -o ../../$@ .
 
 clean_java:
 	mvn -B -q clean
