@@ -13,6 +13,8 @@ import (
 	fakeenmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1alpha1/fake"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/iot/v1alpha1"
 	fakeiotv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/iot/v1alpha1/fake"
+	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1alpha1"
+	fakeuserv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -80,4 +82,14 @@ func (c *Clientset) IotV1alpha1() iotv1alpha1.IotV1alpha1Interface {
 // Iot retrieves the IotV1alpha1Client
 func (c *Clientset) Iot() iotv1alpha1.IotV1alpha1Interface {
 	return &fakeiotv1alpha1.FakeIotV1alpha1{Fake: &c.Fake}
+}
+
+// UserV1alpha1 retrieves the UserV1alpha1Client
+func (c *Clientset) UserV1alpha1() userv1alpha1.UserV1alpha1Interface {
+	return &fakeuserv1alpha1.FakeUserV1alpha1{Fake: &c.Fake}
+}
+
+// User retrieves the UserV1alpha1Client
+func (c *Clientset) User() userv1alpha1.UserV1alpha1Interface {
+	return &fakeuserv1alpha1.FakeUserV1alpha1{Fake: &c.Fake}
 }

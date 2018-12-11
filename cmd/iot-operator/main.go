@@ -9,6 +9,7 @@ import (
     "flag"
     "fmt"
     enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
+    "github.com/operator-framework/operator-sdk/pkg/k8sutil"
     "k8s.io/client-go/kubernetes/scheme"
     "os"
     "runtime"
@@ -38,12 +39,15 @@ func main() {
     printVersion()
 
     /*
-       namespace, err := k8sutil.GetWatchNamespace()
-       if err != nil {
-           log.Error(err, "failed to get watch namespace")
-           os.Exit(1)
-       }
+    namespace, err:= k8sutil.GetWatchNamespace()
+    if err != nil {
+        log.Error(err, "failed to get watch namespace")
+        os.Exit(1)
+    }
     */
+
+    // TODO: replace when enmasse#1280 is fixed
+    namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
 
     cfg, err := config.GetConfig()
     if err != nil {
@@ -51,7 +55,7 @@ func main() {
         os.Exit(1)
     }
 
-    mgr, err := manager.New(cfg, manager.Options{Namespace: "" /*NOTE: watching all namespaces*/ })
+    mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
     if err != nil {
         log.Error(err, "")
         os.Exit(1)
@@ -70,6 +74,8 @@ func main() {
         log.Error(err, "Failed to register controller")
         os.Exit(1)
     }
+
+    // starting ...
 
     log.Info("Starting the operator")
 

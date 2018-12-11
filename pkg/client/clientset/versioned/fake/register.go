@@ -10,6 +10,7 @@ package fake
 import (
 	enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
+	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -42,4 +43,5 @@ func init() {
 func AddToScheme(scheme *runtime.Scheme) {
 	enmassev1alpha1.AddToScheme(scheme)
 	iotv1alpha1.AddToScheme(scheme)
+	userv1alpha1.AddToScheme(scheme)
 }

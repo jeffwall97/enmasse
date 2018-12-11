@@ -50,7 +50,6 @@ type ProvidedDownstreamStrategy struct {
 }
 
 type ManagedDownstreamStrategy struct {
-    Namespace        string `json:"namespace"`
     AddressSpaceName string `json:"addressSpaceName"`
 }
 

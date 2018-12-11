@@ -24,7 +24,18 @@ type AddressSpaceSpec struct {
     Plan string `json:"plan"`
     Type string `json:"type"`
 
+    AuthenticationService *AuthenticationService `json:"authenticationService,omitempty"`
+
     Ednpoints []EndpointSpec `json:"endpoints"`
+}
+
+type AuthenticationService struct {
+    Type    string            `json:"type"`
+    Details map[string]Detail `json:"details"`
+}
+
+type Detail interface {
+    DeepCopyDetail() Detail
 }
 
 type EndpointSpec struct {

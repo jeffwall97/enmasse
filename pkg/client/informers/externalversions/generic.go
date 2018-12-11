@@ -12,6 +12,7 @@ import (
 
 	v1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
+	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -49,6 +50,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		// Group=iot.enmasse.io, Version=v1alpha1
 	case iotv1alpha1.SchemeGroupVersion.WithResource("iotprojects"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Iot().V1alpha1().IoTProjects().Informer()}, nil
+
+		// Group=user.enmasse.io, Version=v1alpha1
+	case userv1alpha1.SchemeGroupVersion.WithResource("messagingusers"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.User().V1alpha1().MessagingUsers().Informer()}, nil
 
 	}
 

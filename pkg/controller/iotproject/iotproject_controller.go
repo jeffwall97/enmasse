@@ -8,8 +8,9 @@ package iotproject
 import (
     "context"
     "fmt"
-    enmassealpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
+    enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
     iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
+    userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1alpha1"
     enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
     "k8s.io/apimachinery/pkg/api/errors"
     "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,12 +19,12 @@ import (
     "sigs.k8s.io/controller-runtime/pkg/client"
     "sigs.k8s.io/controller-runtime/pkg/client/config"
     "sigs.k8s.io/controller-runtime/pkg/controller"
+    "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
     "sigs.k8s.io/controller-runtime/pkg/handler"
     "sigs.k8s.io/controller-runtime/pkg/manager"
     "sigs.k8s.io/controller-runtime/pkg/reconcile"
     logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
     "sigs.k8s.io/controller-runtime/pkg/source"
-    "time"
 )
 
 var log = logf.Log.WithName("controller_iotproject")
@@ -66,8 +67,42 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
         return err
     }
 
-    ls := NewListerSource(30*time.Second, r.enmasseclientset)
-    err = c.Watch(&ls, &handler.EnqueueRequestForObject{})
+    // Watch for enmasse address space
+
+    ownerHandler := ForkedEnqueueRequestForOwner{
+        OwnerType:    &iotv1alpha1.IoTProject{},
+        IsController: true,
+    }
+
+    err = c.Watch(&source.Kind{Type: &enmassev1alpha1.AddressSpace{}},
+        &handler.EnqueueRequestsFromMapFunc{
+            ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
+
+                log.Info("Change event", "kind", "AddressSpace", "object", a)
+
+                // check if we have an owner
+
+                result := ownerHandler.GetOwnerReconcileRequest(a.Meta)
+
+                if result != nil && len(result) > 0 {
+                    log.Info("Owned resource")
+                    // looks like an owned resource ... take this is a result
+                    return result
+                }
+
+                // we need to actively look for a mapped resource
+
+                // a is the AddressSpace that changed
+                addressSpaceNamespace := a.Meta.GetNamespace()
+                addressSpaceName := a.Meta.GetName()
+
+                log.Info("Looking up IoT project for un-owned addressspace", "AddressSpaceNamespace", addressSpaceNamespace, "AddressSpaceName", addressSpaceName)
+
+                // look for an iot project, that references this address space
+
+                return convertToRequests(r.findIoTProjectsByMappedAddressSpaces(addressSpaceNamespace, addressSpaceName))
+            }),
+        })
     if err != nil {
         return err
     }
@@ -155,6 +190,12 @@ func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Re
         status, err := r.reconcileProvided(context.TODO(), &request, project)
         return r.applyUpdate(status, err, &request, project)
 
+    } else if project.Spec.DownstreamStrategy.ManagedDownstreamStrategy != nil {
+
+        // handling as managed
+        status, err := r.reconcileManaged(context.TODO(), &request, project)
+        return r.applyUpdate(status, err, &request, project)
+
     } else {
 
         // unknown strategy, we don't know how to handle this
@@ -174,12 +215,7 @@ func (r *ReconcileIoTProject) reconcileExternal(ctx context.Context, request *re
     return project.Spec.DownstreamStrategy.ExternalDownstreamStrategy, nil
 }
 
-func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
-
-    log.Info("Reconcile project with provided strategy")
-
-    strategy := project.Spec.DownstreamStrategy.ProvidedDownstreamStrategy
-
+func getOrDefaults(strategy *iotv1alpha1.ProvidedDownstreamStrategy) (string, string, iotv1alpha1.EndpointMode, error) {
     endpointName := strategy.EndpointName
     if len(endpointName) == 0 {
         endpointName = DefaultEndpointName
@@ -188,6 +224,7 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
     if len(portName) == 0 {
         portName = DefaultPortName
     }
+
     var endpointMode iotv1alpha1.EndpointMode
     if strategy.EndpointMode != nil {
         endpointMode = *strategy.EndpointMode
@@ -196,10 +233,24 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
     }
 
     if len(strategy.Namespace) == 0 {
-        return nil, fmt.Errorf("missing namespace")
+        return "", "", 0, fmt.Errorf("missing namespace")
     }
     if len(strategy.AddressSpaceName) == 0 {
-        return nil, fmt.Errorf("missing address space name")
+        return "", "", 0, fmt.Errorf("missing address space name")
+    }
+
+    return endpointName, portName, endpointMode, nil
+}
+
+func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
+
+    log.Info("Reconcile project with provided strategy")
+
+    strategy := project.Spec.DownstreamStrategy.ProvidedDownstreamStrategy
+    endpointName, portName, endpointMode, err := getOrDefaults(strategy)
+
+    if err != nil {
+        return nil, err
     }
 
     return r.processProvided(strategy, endpointMode, endpointName, portName)
@@ -217,6 +268,18 @@ func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDown
         return nil, err
     }
 
+    return extractEndpointInformation(endpointName, endpointMode, portName, &strategy.Credentials, addressSpace, strategy.TLS)
+}
+
+func extractEndpointInformation(
+    endpointName string,
+    endpointMode iotv1alpha1.EndpointMode,
+    portName string,
+    credentials *iotv1alpha1.Credentials,
+    addressSpace *enmassev1alpha1.AddressSpace,
+    forceTls *bool,
+) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
+
     if !addressSpace.Status.IsReady {
         // not ready, yet … wait
         return nil, fmt.Errorf("address space is not ready yet")
@@ -224,7 +287,7 @@ func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDown
 
     endpoint := new(iotv1alpha1.ExternalDownstreamStrategy)
 
-    endpoint.Credentials = strategy.Credentials
+    endpoint.Credentials = *credentials
 
     foundEndpoint := false
     for _, es := range addressSpace.Status.EndpointStatus {
@@ -234,7 +297,7 @@ func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDown
 
         foundEndpoint = true
 
-        var ports []enmassealpha1.Port
+        var ports []enmassev1alpha1.Port
 
         switch endpointMode {
         case iotv1alpha1.Service:
@@ -256,7 +319,7 @@ func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDown
 
                 endpoint.Port = port.Port
 
-                tls, err := isTls(addressSpace, &es, &port, strategy)
+                tls, err := isTls(addressSpace, &es, &port, forceTls)
                 if err != nil {
                     return nil, err
                 }
@@ -278,7 +341,7 @@ func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDown
     return endpoint, nil
 }
 
-func findEndpointSpec(addressSpace *enmassealpha1.AddressSpace, endpointStatus *enmassealpha1.EndpointStatus) *enmassealpha1.EndpointSpec {
+func findEndpointSpec(addressSpace *enmassev1alpha1.AddressSpace, endpointStatus *enmassev1alpha1.EndpointStatus) *enmassev1alpha1.EndpointSpec {
     for _, end := range addressSpace.Spec.Ednpoints {
         if end.Name != endpointStatus.Name {
             continue
@@ -288,14 +351,15 @@ func findEndpointSpec(addressSpace *enmassealpha1.AddressSpace, endpointStatus *
     return nil
 }
 
+// get a an estimate if TLS should be enabled for a port, or not
 func isTls(
-    addressSpace *enmassealpha1.AddressSpace,
-    endpointStatus *enmassealpha1.EndpointStatus,
-    port *enmassealpha1.Port,
-    strategy *iotv1alpha1.ProvidedDownstreamStrategy) (bool, error) {
+    addressSpace *enmassev1alpha1.AddressSpace,
+    endpointStatus *enmassev1alpha1.EndpointStatus,
+    port *enmassev1alpha1.Port,
+    forceTls *bool) (bool, error) {
 
-    if strategy.TLS != nil {
-        return *strategy.TLS, nil
+    if forceTls != nil {
+        return *forceTls, nil
     }
 
     endpoint := findEndpointSpec(addressSpace, endpointStatus)
@@ -316,4 +380,109 @@ func isTls(
 
     return false, nil
 
+}
+
+func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
+
+    log.Info("Reconcile project with managed strategy")
+
+    strategy := project.Spec.DownstreamStrategy.ManagedDownstreamStrategy
+
+    addressSpace := &enmassev1alpha1.AddressSpace{
+        ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName},
+    }
+
+    _, err := controllerutil.CreateOrUpdate(ctx, r.client, addressSpace, func(existing runtime.Object) error {
+        existingAddressSpace := existing.(*enmassev1alpha1.AddressSpace)
+        controllerutil.SetControllerReference(project, existingAddressSpace, r.scheme)
+        return reconcileAddressSpace(project, strategy, existingAddressSpace)
+    })
+
+    if err != nil {
+        return nil, err
+    }
+
+    adapterUser := &userv1alpha1.MessagingUser{
+        ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + ".adapter"},
+    }
+
+    _, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
+        existingUser := existing.(*userv1alpha1.MessagingUser)
+        controllerutil.SetControllerReference(project, existingUser, r.scheme)
+        return reconcileAdapterMessagingUser(project, existingUser)
+    })
+
+    if err != nil {
+        return nil, err
+    }
+
+    /*
+    addressSpace := newAddressSpace(project, strategy)
+    if err := controllerutil.SetControllerReference(project, addressSpace, r.scheme); err != nil {
+        return nil, err
+    }
+
+    found := &enmassev1alpha1.AddressSpace{}
+    err := r.client.Get(ctx, types.NamespacedName{Name: addressSpace.Name, Namespace: addressSpace.Namespace}, found)
+    if err != nil && errors.IsNotFound(err) {
+        log.Info("Creating a new AddressSpace", "AddressSpace.Namespace", addressSpace.Namespace, "AddressSpace.Name", addressSpace.Name)
+        if err = r.client.Create(context.TODO(), addressSpace); err != nil {
+            return nil, err
+        }
+    }
+
+    credentials := newMessagingUser(project, addressSpace)
+    */
+
+    credentials := iotv1alpha1.Credentials{
+        Username: adapterUser.Spec.Username,
+        Password: "bar",
+    }
+    forceTls := true;
+    return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", &credentials, addressSpace, &forceTls)
+}
+
+func reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, existing *enmassev1alpha1.AddressSpace) error {
+
+    if existing.CreationTimestamp.IsZero() {
+        existing.ObjectMeta.Labels = project.Labels
+    }
+
+    existing.Spec = enmassev1alpha1.AddressSpaceSpec{
+        Type: "standard",
+        Plan: "standard-unlimited",
+    }
+
+    return nil
+}
+
+func reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, existing *userv1alpha1.MessagingUser) error {
+
+    username := "adapter"
+    password := "bar"
+    tenant := project.Namespace + "." + project.Name
+
+    existing.Spec = userv1alpha1.MessagingUserSpec{
+
+        Username: username,
+
+        Authentication: userv1alpha1.AuthenticationSpec{
+            Type:     "password",
+            Password: password,
+        },
+
+        Authorization: userv1alpha1.AuthorizationSpec{
+            Addresses: []string{
+                "telemetry/" + tenant + "/#",
+                "event/" + tenant + "/#",
+                "command/" + tenant + "/#",
+            },
+            Operations: []string{
+                "send",
+                "recv",
+            },
+        },
+    }
+
+    return nil
 }
