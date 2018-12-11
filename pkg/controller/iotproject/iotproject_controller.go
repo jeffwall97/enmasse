@@ -382,6 +382,19 @@ func isTls(
 
 }
 
+func (r *ReconcileIoTProject) ensureOwnerIsSet(owner, object v1.Object) error {
+
+    ts := object.GetCreationTimestamp()
+    if ts.IsZero() {
+        err := controllerutil.SetControllerReference(owner, object, r.scheme)
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+
 func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
 
     log.Info("Reconcile project with managed strategy")
@@ -394,7 +407,11 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 
     _, err := controllerutil.CreateOrUpdate(ctx, r.client, addressSpace, func(existing runtime.Object) error {
         existingAddressSpace := existing.(*enmassev1alpha1.AddressSpace)
-        controllerutil.SetControllerReference(project, existingAddressSpace, r.scheme)
+
+        r.ensureOwnerIsSet(project, existingAddressSpace)
+
+        log.Info("New address space", "AddressSpace", existingAddressSpace)
+
         return reconcileAddressSpace(project, strategy, existingAddressSpace)
     })
 
@@ -408,7 +425,9 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 
     _, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
         existingUser := existing.(*userv1alpha1.MessagingUser)
-        controllerutil.SetControllerReference(project, existingUser, r.scheme)
+
+        r.ensureOwnerIsSet(project, existingUser)
+
         return reconcileAdapterMessagingUser(project, existingUser)
     })
 
@@ -471,15 +490,17 @@ func reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, existing *us
             Password: password,
         },
 
-        Authorization: userv1alpha1.AuthorizationSpec{
-            Addresses: []string{
-                "telemetry/" + tenant + "/#",
-                "event/" + tenant + "/#",
-                "command/" + tenant + "/#",
-            },
-            Operations: []string{
-                "send",
-                "recv",
+        Authorization: []userv1alpha1.AuthorizationSpec{
+            {
+                Addresses: []string{
+                    "telemetry/" + tenant + "/#",
+                    "event/" + tenant + "/#",
+                    "command/" + tenant + "/#",
+                },
+                Operations: []string{
+                    "send",
+                    "recv",
+                },
             },
         },
     }

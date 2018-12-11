@@ -119,7 +119,13 @@ func (in *MessagingUserList) DeepCopyObject() runtime.Object {
 func (in *MessagingUserSpec) DeepCopyInto(out *MessagingUserSpec) {
 	*out = *in
 	out.Authentication = in.Authentication
-	in.Authorization.DeepCopyInto(&out.Authorization)
+	if in.Authorization != nil {
+		in, out := &in.Authorization, &out.Authorization
+		*out = make([]AuthorizationSpec, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	return
 }
 

@@ -20,9 +20,9 @@ type MessagingUser struct {
 }
 
 type MessagingUserSpec struct {
-    Username       string             `json:"username"`
-    Authentication AuthenticationSpec `json:"authentication"`
-    Authorization  AuthorizationSpec  `json:"authorization"`
+    Username       string              `json:"username"`
+    Authentication AuthenticationSpec  `json:"authentication"`
+    Authorization  []AuthorizationSpec `json:"authorization,omitempty"`
 }
 
 type AuthenticationSpec struct {
