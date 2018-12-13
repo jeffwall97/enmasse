@@ -21,7 +21,7 @@ type garbageCollector struct {
 
 func NewGarbageCollector() *garbageCollector {
 
-    ticker := time.NewTicker(1 * time.Second)
+    ticker := time.NewTicker(1 * time.Minute)
     stopChan := make(chan bool)
 
     result := &garbageCollector{
