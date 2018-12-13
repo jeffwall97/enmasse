@@ -1,0 +1,9 @@
+---
+kind: IoTProject
+apiVersion: iot.enmasse.io/v1alpha1
+metadata:
+  name: managed
+spec:
+  downstreamStrategy:
+    managedStrategy:
+      addressSpaceName: managed
