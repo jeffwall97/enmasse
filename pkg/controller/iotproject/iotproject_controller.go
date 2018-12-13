@@ -11,13 +11,11 @@ import (
     enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
     iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
     userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1alpha1"
-    enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
     "k8s.io/apimachinery/pkg/api/errors"
     "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/apimachinery/pkg/runtime"
-    "k8s.io/klog"
+    "k8s.io/apimachinery/pkg/types"
     "sigs.k8s.io/controller-runtime/pkg/client"
-    "sigs.k8s.io/controller-runtime/pkg/client/config"
     "sigs.k8s.io/controller-runtime/pkg/controller"
     "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
     "sigs.k8s.io/controller-runtime/pkg/handler"
@@ -40,6 +38,7 @@ func Add(mgr manager.Manager) error {
 
 func newReconciler(mgr manager.Manager) *ReconcileIoTProject {
 
+    /*
     cfg, err := config.GetConfig()
     if err != nil {
         klog.Fatalf("Error getting in-cluster config: %v", err.Error())
@@ -49,8 +48,9 @@ func newReconciler(mgr manager.Manager) *ReconcileIoTProject {
     if err != nil {
         klog.Fatalf("Error building EnMasse client: t%v", err.Error())
     }
+    */
 
-    return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme(), enmasseclientset: clientset}
+    return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
 func add(mgr manager.Manager, r *ReconcileIoTProject) error {
@@ -78,7 +78,7 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
         &handler.EnqueueRequestsFromMapFunc{
             ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 
-                log.Info("Change event", "kind", "AddressSpace", "object", a)
+                log.V(2).Info("Change event", "kind", "AddressSpace", "object", a)
 
                 // check if we have an owner
 
@@ -118,7 +118,7 @@ type ReconcileIoTProject struct {
     client client.Client
     scheme *runtime.Scheme
 
-    enmasseclientset *enmasse.Clientset
+    // enmasseclientset *enmasse.Clientset
 }
 
 func (r *ReconcileIoTProject) updateProjectStatusError(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) error {
@@ -210,7 +210,7 @@ func (r *ReconcileIoTProject) Reconcile(request reconcile.Request) (reconcile.Re
 }
 
 func (r *ReconcileIoTProject) reconcileExternal(ctx context.Context, request *reconcile.Request, project *iotv1alpha1.IoTProject) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
-    // we simply copy over the externally provided information
+    // we simply copy over the external information
 
     return project.Spec.DownstreamStrategy.ExternalDownstreamStrategy, nil
 }
@@ -258,11 +258,10 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
 
 func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDownstreamStrategy, endpointMode iotv1alpha1.EndpointMode, endpointName string, portName string) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
 
-    // FIXME: use cached version, when enmasse#1280 is fixed
-    // addressSpace := &enmassealpha1.AddressSpace{}
-    // err := r.client.Get(ctx, types.NamespacedName{Namespace: strategy.Namespace, Name: strategy.AddressSpaceName}, addressSpace)
+    addressSpace := &enmassev1alpha1.AddressSpace{}
+    err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: strategy.Namespace, Name: strategy.AddressSpaceName}, addressSpace)
 
-    addressSpace, err := r.enmasseclientset.EnmasseV1alpha1().AddressSpaces(strategy.Namespace).Get(strategy.AddressSpaceName, v1.GetOptions{})
+    // addressSpace, err := r.enmasseclientset.EnmasseV1alpha1().AddressSpaces(strategy.Namespace).Get(strategy.AddressSpaceName, v1.GetOptions{})
     if err != nil {
         log.WithValues("namespace", strategy.Namespace, "name", strategy.AddressSpaceName).Info("Failed to get address space")
         return nil, err
@@ -308,7 +307,7 @@ func extractEndpointInformation(
             ports = es.ExternalPorts
         }
 
-        log.WithValues("ports", ports).Info("Ports to scan")
+        log.V(2).Info("Ports to scan", "ports", ports)
 
         endpoint.Certificate = es.Certificate
 

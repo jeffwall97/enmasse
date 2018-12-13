@@ -1,10 +1,11 @@
 TOPDIR=$(dir $(lastword $(MAKEFILE_LIST)))
 include $(TOPDIR)/Makefile.env.mk
 BUILD_DIRS       = none-authservice
-DOCKER_DIRS	     = agent topic-forwarder artemis broker-plugin api-server address-space-controller standard-controller keycloak-plugin keycloak-controller router router-metrics mqtt-gateway mqtt-lwt service-broker iot/qdr-proxy-configurator
+DOCKER_DIRS	     = agent topic-forwarder artemis broker-plugin api-server address-space-controller standard-controller keycloak-plugin keycloak-controller router router-metrics mqtt-gateway mqtt-lwt service-broker $(IOT_DOCKER_DIRS)
+IOT_DOCKER_DIRS  = iot/qdr-proxy-configurator iot/iot-operator iot/iot-gc
 FULL_BUILD 	     = true
 
-GO_TARGETS = iot/qdr-proxy-configurator/qdr-proxy-configurator
+GO_TARGETS = iot/qdr-proxy-configurator/qdr-proxy-configurator iot/iot-operator/iot-operator iot/iot-gc/iot-gc
 DOCKER_TARGETS = docker_build docker_tag docker_push clean
 BUILD_TARGETS  = init build test package $(DOCKER_TARGETS) coverage
 INSTALLDIR=$(CURDIR)/templates/install
@@ -38,6 +39,12 @@ build_go: $(GO_TARGETS)
 
 iot/qdr-proxy-configurator/qdr-proxy-configurator:
 	cd cmd/qdr-proxy-configurator && go build -o ../../$@ .
+
+iot/iot-operator/iot-operator:
+	cd cmd/iot-operator && go build -o ../../$@ .
+
+iot/iot-gc/iot-gc:
+	cd cmd/iot-gc && go build -o ../../$@ .
 
 clean_java:
 	mvn -B -q clean
