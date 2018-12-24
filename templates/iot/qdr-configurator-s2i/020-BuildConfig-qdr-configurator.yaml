@@ -19,7 +19,7 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: qdrouterd-base:latest
+        name: qdrouterd-base:1.4.1
       dockerfilePath: iot/qdr-proxy-configurator/Dockerfile.s2i
   output:
     to:
