@@ -103,9 +103,7 @@ func (r *ReconcileMessagingService) Reconcile(request reconcile.Request) (reconc
 		return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
-	err = applyAddressSpaceController(r.client, instance)
-	return reconcile.Result{}, err
+	return applyResources(r.client, instance)
 }
 
 /*
@@ -160,7 +158,7 @@ func newPodForCR(cr *adminv1alpha1.MessagingService) *corev1.Pod {
 }
 */
 
-func applyAddressSpaceController(client client.Client, cr *adminv1alpha1.MessagingService) error {
+func applyResources(client client.Client, cr *adminv1alpha1.MessagingService) error {
 	f, err := ioutil.ReadFile("/address-space-controller/050-Deployment-address-space-controller.yaml")
 	if err != nil {
 		fmt.Print(err)
@@ -170,30 +168,28 @@ func applyAddressSpaceController(client client.Client, cr *adminv1alpha1.Messagi
 	decode := api.Codecs.UniversalDeserializer().Decode
 	obj, groupVersionKind, err := decode([]byte(f), nil, nil)
 
-	if (groupVersionKind != "Deployment") {
-		return error "Wrong deployment type";
+	if err != nil {
+		fmt.Print(err)
+		return nil
 	}
 
-	deployment := obj
-
-	found := &appsv1.Deployment{}
-	err = client.Get(context.TODO(), types.NamespacedName{Name: "address-space-controller", Namespace: cr.Spec.Namespace}, found)
+	found := &unstructured.Unstructured{}
+	err = client.Get(context.TODO(), types.NamespacedName{Name: obj.GetName(), Namespace: cr.Spec.Namespace}, found)
 
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new address space controller", "Deployment.Namespace", , "Pod.Name", pod.Name) err = r.client.Create(context.TODO(), pod)
+		reqLogger.Info("Creating a new resource", "Deployment.Namespace", , "Pod.Name", pod.Name)
+		err = client.Create(context.TODO(), obj)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
 
-		// Pod created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
+	client.Update(context.TODO(), obj);
 	// Pod already exists - don't requeue
 	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
 	return reconcile.Result{}, nil
-
-	return nil
 }
