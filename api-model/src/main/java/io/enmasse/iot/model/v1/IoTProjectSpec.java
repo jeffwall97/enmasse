@@ -4,11 +4,8 @@
  */
 package io.enmasse.iot.model.v1;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-// FIXME: remove ignore annotation
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class IoTProjectSpec {
 
     private DownstreamStrategy downstreamStrategy;
@@ -27,7 +24,7 @@ public class IoTProjectSpec {
         return configuration;
     }
 
-    public void setConfiguration(ObjectNode configuration) {
+    public void setConfiguration(final ObjectNode configuration) {
         this.configuration = configuration;
     }
 

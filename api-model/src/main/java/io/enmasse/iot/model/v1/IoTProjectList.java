@@ -4,8 +4,18 @@
  */
 package io.enmasse.iot.model.v1;
 
-@ApiVersion("v1alpha1")
+import static io.enmasse.iot.model.v1.Version.API_VERSION;
+
+import io.enmasse.common.model.AbstractList;
+import io.enmasse.common.model.DefaultCustomResource;
+
+@DefaultCustomResource
+@SuppressWarnings("serial")
 public class IoTProjectList extends AbstractList<IoTProject> {
 
-    private static final long serialVersionUID = 1L;
+    public static final String KIND = "IoTProjectList";
+
+    public IoTProjectList() {
+        super(KIND, API_VERSION);
+    }
 }

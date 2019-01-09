@@ -7,8 +7,11 @@ package io.enmasse.iot.model.v1;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+//FIXME: implement missing fields and remove ignore annotation
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(NON_NULL)
 public class ExternalDownstreamStrategy {
 
@@ -25,50 +28,50 @@ public class ExternalDownstreamStrategy {
     private byte[] certificate;
 
     public String getHost() {
-        return host;
+        return this.host;
     }
 
-    public void setHost(String host) {
+    public void setHost(final String host) {
         this.host = host;
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
-    public void setPort(int port) {
+    public void setPort(final int port) {
         this.port = port;
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(final String username) {
         this.username = username;
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
     public boolean isTls() {
-        return tls;
+        return this.tls;
     }
 
-    public void setTls(boolean tls) {
+    public void setTls(final boolean tls) {
         this.tls = tls;
     }
 
     public byte[] getCertificate() {
-        return certificate;
+        return this.certificate;
     }
 
-    public void setCertificate(byte[] certificate) {
+    public void setCertificate(final byte[] certificate) {
         this.certificate = certificate;
     }
 
