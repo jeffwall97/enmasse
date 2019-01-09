@@ -12,8 +12,6 @@ spec:
     singular: iotproject
     shortNames:
     - itp
-  subresources:
-    status: {}
   additionalPrinterColumns:
   - name: Downstream Host
     type: string
