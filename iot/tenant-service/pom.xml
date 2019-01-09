@@ -31,7 +31,7 @@
 
     <dependency>
       <groupId>io.enmasse</groupId>
-      <artifactId>address-model-lib</artifactId>
+      <artifactId>api-model</artifactId>
     </dependency>
 
     <dependency>
