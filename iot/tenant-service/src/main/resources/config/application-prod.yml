@@ -8,6 +8,9 @@ enmasse:
       trustStorePath: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
       trustStoreFormat: PEM
 
+      validation:
+        certPath: /etc/tls-auth-service/tls.crt
+
     tenant:
 
       endpoint:

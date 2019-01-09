@@ -38,11 +38,11 @@ spec:
           value: prod
         - name: LOGGING_CONFIG
           value: file:///etc/config/logback-spring.xml
-        - name: ENMASSE_IOT_AUTH_VALIDATION_SHARED_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: hono-secrets
-              key: shared.signing.secret
+#        - name: ENMASSE_IOT_AUTH_VALIDATION_SHARED_SECRET
+#          valueFrom:
+#            secretKeyRef:
+#              name: hono-secrets
+#              key: shared.signing.secret
         - name: KUBERNETES_NAMESPACE
           valueFrom:
             fieldRef:
@@ -81,6 +81,9 @@ spec:
         - mountPath: /etc/tls
           name: tls
           readOnly: true
+        - mountPath: /etc/tls-auth-service
+          name: tls-auth-service
+          readOnly: true
       volumes:
       - name: conf
         configMap:
@@ -88,3 +91,6 @@ spec:
       - name: tls
         secret:
           secretName: iot-tenant-service-tls
+      - name: tls-auth-service
+        secret:
+          secretName: hono-service-auth-tls
