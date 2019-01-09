@@ -13,7 +13,7 @@ spec:
     type: Git
     git:
       uri: https://github.com/eclipse/hono
-      ref: 0.8.x
+      ref: "${HONO_VERSION}"
   strategy: 
     type: source
     sourceStrategy:
@@ -22,7 +22,8 @@ spec:
         name: fabric8-s2i-java-custom:latest
       env:
       - name: MAVEN_ARGS_APPEND
-        value: -B -pl org.eclipse.hono:hono-adapter-http-vertx --also-make -Pnetty-tcnative -Pmetrics-prometheus
+        value: -B -pl org.eclipse.hono:hono-adapter-http-vertx --also-make -Pnetty-tcnative
+        #value: -B -pl org.eclipse.hono:hono-adapter-http-vertx --also-make -Pnetty-tcnative -Pmetrics-prometheus
       - name: ARTIFACT_DIR
         value: adapters/http-vertx/target
       - name: ARTIFACT_COPY_ARGS

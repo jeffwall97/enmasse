@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: iot-gc
   labels:
-    app: enmasse
+    app: iot-core
     enmasse-component: iot
 spec:
   triggers: 

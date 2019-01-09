@@ -2,10 +2,10 @@ kind: Route
 apiVersion: v1
 metadata:
   labels:
-    app: iot-registry
-    compnent: hono-service-device-registry
+    app: iot-http-adapter
+    compnent: iot-http-adapter
     enmasse-component: iot
-  name: device-registry
+  name: iot-http-adapter
 spec:
   port:
     targetPort: https
@@ -13,4 +13,4 @@ spec:
     termination: reencrypt
   to:
     kind: Service
-    name: hono-service-device-registry
+    name: iot-http-adapter

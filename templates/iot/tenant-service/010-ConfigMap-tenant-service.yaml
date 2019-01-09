@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: iot-tenant-service
   labels:
-    app: iot-tenant-service
+    app: iot-registry
     enmasse-component: iot
 data:
   logback-spring.xml: |+

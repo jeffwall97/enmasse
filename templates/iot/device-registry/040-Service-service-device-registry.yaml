@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: hono-service-device-registry
   labels:
-    app: enmasse
+    app: iot-registry
     component: hono-service-device-registry
     enmasse-component: iot
   annotations:
@@ -14,14 +14,10 @@ spec:
     port: 5671
     protocol: TCP
     targetPort: 5671
-  - name: http
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
   - name: https
     port: 8443
     protocol: TCP
     targetPort: 8443
   selector:
-    app: enmasse
+    app: iot-registry
     component: hono-service-device-registry

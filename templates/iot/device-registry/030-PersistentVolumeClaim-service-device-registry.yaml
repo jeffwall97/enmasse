@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: hono-device-registry-pvc
   labels:
-    app: enmasse
+    app: iot-registry
     component: hono-service-device-registry
     enmasse-component: iot
 spec:

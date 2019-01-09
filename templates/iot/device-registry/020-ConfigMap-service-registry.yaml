@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: hono-service-device-registry-config
   labels:
-    app: enmasse
+    app: iot-registry
     component: hono-service-device-registry
     enmasse-component: iot
 data:
@@ -21,6 +21,8 @@ data:
         trustStorePath: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
         trustStoreFormat: PEM
         name: 'Hono Device Registry'
+        validation:
+          certPath: /etc/tls-auth-service/tls.crt
       registry:
         amqp:
           bindAddress: 0.0.0.0
@@ -32,8 +34,6 @@ data:
           keyPath: /etc/tls/tls.key
           certPath: /etc/tls/tls.crt
           keyFormat: PEM
-          insecurePortBindAddress: 0.0.0.0
-          insecurePortEnabled: true
         svc:
           filename: /var/lib/hono/device-registry/device-identities.json
           saveToFile: true

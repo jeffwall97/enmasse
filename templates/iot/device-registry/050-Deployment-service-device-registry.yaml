@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: enmasse
+    app: iot-registry
     component: hono-service-device-registry
     enmasse-component: iot
   name: hono-service-device-registry
@@ -10,12 +10,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: enmasse
+      app: iot-registry
       component: hono-service-device-registry
   template:
     metadata:
       labels:
-        app: enmasse
+        app: iot-registry
         component: hono-service-device-registry
     spec:
       initContainers:
@@ -51,25 +51,6 @@ spec:
           value: "true"
         - name: HONO_REGISTRY_SVC_MAX_DEVICES_PER_TENANT
           value: "100"
-#        - name: HONO_REGISTRY_SVC_SIGNING_SHARED_SECRET
-#          valueFrom:
-#            secretKeyRef:
-#              name: hono-secrets
-#              key: shared.signing.secret
-#        - name: HONO_AUTH_VALIDATION_SHARED_SECRET
-#          valueFrom:
-#            secretKeyRef:
-#              name: hono-secrets
-#              key: shared.signing.secret
-#        - name: AB_JOLOKIA_USER
-#          value: jolokia
-#        - name: AB_JOLOKIA_PASSWORD_RANDOM
-#          value: "false"
-#        - name: AB_JOLOKIA_PASSWORD
-#          valueFrom:
-#            secretKeyRef:
-#              name: hono-secrets
-#              key: jolokia.password
         readinessProbe:
           httpGet:
             path: /readiness
@@ -86,13 +67,13 @@ spec:
         - containerPort: 8778
           name: jolokia
         - containerPort: 8088
-          name: radan-http
+          name: health
           protocol: TCP
         - containerPort: 8080
-          name: http-alt
+          name: http
           protocol: TCP
         - containerPort: 8443
-          name: pcsync-https
+          name: https
           protocol: TCP
         - containerPort: 5671
           name: amqps
@@ -103,8 +84,6 @@ spec:
         resources:
           limits:
             memory: 512Mi
-        securityContext:
-          privileged: false
         volumeMounts:
         - mountPath: /var/lib/hono/device-registry
           name: registry
@@ -112,6 +91,9 @@ spec:
           name: conf
         - mountPath: /etc/tls
           name: tls
+          readOnly: true
+        - mountPath: /etc/tls-auth-service
+          name: tls-auth-service
           readOnly: true
       volumes:
       - name: registry
@@ -126,3 +108,6 @@ spec:
       - name: tls
         secret:
           secretName: hono-service-device-registry-tls
+      - name: tls-auth-service
+        secret:
+          secretName: hono-service-auth-tls

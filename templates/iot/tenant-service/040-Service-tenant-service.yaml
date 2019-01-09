@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: iot-tenant-service
   labels:
-    app: iot-tenant-service
+    app: iot-registry
     deploymentconfig: iot-tenant-service
     enmasse-component: iot
   annotations:
@@ -17,5 +17,5 @@ spec:
       port: 5671
       targetPort: 5671
   selector:
-    app: iot-tenant-service
+    app: iot-registry
     deploymentconfig: iot-tenant-service
