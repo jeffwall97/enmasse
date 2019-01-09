@@ -5,6 +5,7 @@ metadata:
   labels:
     app: iot-tenant-service
     deploymentconfig: iot-tenant-service
+    enmasse-component: iot
 spec:
   replicas: 1
   selector:

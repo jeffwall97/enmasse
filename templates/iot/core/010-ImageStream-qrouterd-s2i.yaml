@@ -2,6 +2,8 @@ kind: ImageStream
 apiVersion: v1
 metadata:
   name: qdrouterd-base
+  labels:
+    enmasse-component: iot
 spec:
   tags:
   - from:
@@ -11,4 +13,4 @@ spec:
       scheduled: true
     name: "1.4.1"
     referencePolicy:
-      type: Source  
+      type: Source

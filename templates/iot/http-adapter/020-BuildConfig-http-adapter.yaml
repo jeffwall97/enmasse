@@ -4,6 +4,7 @@ metadata:
   name: iot-http-adapter
   labels:
     app: iot-http-adapter
+    enmasse-component: iot
 spec:
   triggers: 
     - type: ImageChange
@@ -18,10 +19,10 @@ spec:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: fabric8-s2i-java-custom:2.3
+        name: fabric8-s2i-java-custom:latest
       env:
       - name: MAVEN_ARGS_APPEND
-        value: -B -pl org.eclipse.hono:hono-adapter-http-vertx --also-make -Pnetty-tcnative -Dmaven.test.skip=true
+        value: -B -pl org.eclipse.hono:hono-adapter-http-vertx --also-make -Pnetty-tcnative -Pmetrics-prometheus
       - name: ARTIFACT_DIR
         value: adapters/http-vertx/target
       - name: ARTIFACT_COPY_ARGS

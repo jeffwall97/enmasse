@@ -5,6 +5,7 @@ metadata:
   labels:
     app: enmasse
     component: hono-service-device-registry
+    enmasse-component: iot
 data:
 
   example-credentials.json: |+

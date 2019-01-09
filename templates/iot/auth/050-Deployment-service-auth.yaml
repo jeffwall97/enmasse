@@ -5,6 +5,7 @@ metadata:
   labels:
     app: enmasse
     component: hono-service-auth
+    enmasse-component: iot
   name: hono-service-auth
 spec:
   replicas: 1

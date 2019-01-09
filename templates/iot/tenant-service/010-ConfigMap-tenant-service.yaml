@@ -4,6 +4,7 @@ metadata:
   name: iot-tenant-service
   labels:
     app: iot-tenant-service
+    enmasse-component: iot
 data:
   logback-spring.xml: |+
         <?xml version="1.0" encoding="UTF-8"?>

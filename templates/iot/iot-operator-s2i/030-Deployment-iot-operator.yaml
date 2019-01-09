@@ -1,15 +1,16 @@
 kind: DeploymentConfig
 apiVersion: v1
 metadata:
-  name: iot-gc
+  name: iot-operator
   labels:
-    app: iot-gc
-    deploymentconfig: iot-gc
+    app: iot-operator
+    deploymentconfig: iot-operator
+    enmasse-component: iot
 spec:
   replicas: 1
   selector:
-    app: iot-gc
-    deploymentconfig: iot-gc
+    app: iot-operator
+    deploymentconfig: iot-operator
   strategy:
     type: Rolling
   triggers:
@@ -21,26 +22,27 @@ spec:
           - operator
         from:
           kind: ImageStreamTag
-          name: iot-gc:latest
+          name: iot-operator:latest
   template:
     metadata:
       labels:
-        app: iot-gc
-        deploymentconfig: iot-gc
+        app: iot-operator
+        deploymentconfig: iot-operator
     spec:
       containers:
       - name: operator
-        image: iot-gc
+        image: iot-operator
         imagePullPolicy: Always
         env:
-        - name: WATCH_NAMESPACE
+        - name: POD_NAME
           valueFrom:
             fieldRef:
-              fieldPath: metadata.namespace
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: "iot-operator"
         resources:
           limits:
             memory: 512Mi
         ports:
         volumeMounts:
       volumes:
-

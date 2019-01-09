@@ -19,7 +19,7 @@ spec:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: fabric8-s2i-java-custom:2.3
+        name: fabric8-s2i-java-custom:latest
       env:
       - name: MAVEN_ARGS_APPEND
         value: -pl io.enmasse:tenant-service --also-make

@@ -8,5 +8,5 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-view: "true"
 rules:
   - apiGroups: [ "iot.enmasse.io" ]
-    resources: [ "iot-projects" ]
+    resources: [ "iotprojects" ]
     verbs: [ "get", "list" ]

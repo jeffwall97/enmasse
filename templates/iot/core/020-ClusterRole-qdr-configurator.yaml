@@ -3,6 +3,8 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   name: iot-project-configurator
+  labels:
+    enmasse-component: iot
 rules:
   - apiGroups:
     - iot.enmasse.io
@@ -26,7 +28,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: iot-project-configurator-hono-project
+  name: iot-project-configurator-project
+  labels:
+    enmasse-component: iot
 roleRef:
   kind: ClusterRole
   name: iot-project-configurator
