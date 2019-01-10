@@ -17,7 +17,7 @@ package scaffold
 import (
 	"testing"
 
-	"github.com/operator-framework/operator-sdk/pkg/scaffold/internal/testutil"
+	"github.com/operator-framework/operator-sdk/internal/util/diffutil"
 )
 
 func TestRole(t *testing.T) {
@@ -28,7 +28,7 @@ func TestRole(t *testing.T) {
 	}
 
 	if roleExp != buf.String() {
-		diffs := testutil.Diff(roleExp, buf.String())
+		diffs := diffutil.Diff(roleExp, buf.String())
 		t.Fatalf("expected vs actual differs.\n%v", diffs)
 	}
 }
@@ -41,7 +41,7 @@ func TestRoleClusterScoped(t *testing.T) {
 	}
 
 	if clusterroleExp != buf.String() {
-		diffs := testutil.Diff(clusterroleExp, buf.String())
+		diffs := diffutil.Diff(clusterroleExp, buf.String())
 		t.Fatalf("expected vs actual differs.\n%v", diffs)
 	}
 }
@@ -63,6 +63,12 @@ rules:
   - secrets
   verbs:
   - "*"
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
 - apiGroups:
   - apps
   resources:
@@ -98,6 +104,12 @@ rules:
   - secrets
   verbs:
   - "*"
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
 - apiGroups:
   - apps
   resources:

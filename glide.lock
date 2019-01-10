@@ -1,11 +1,15 @@
 hash: 2ee258b570ed0a7db0ea1608b4164bca6c61b0dabcb49fa09162c55030d75f19
-updated: 2018-12-06T08:44:39.12354517+01:00
+updated: 2019-01-10T15:27:58.344994767+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
   subpackages:
   - compute/metadata
   - internal
+- name: github.com/beorn7/perks
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
+  subpackages:
+  - quantile
 - name: github.com/davecgh/go-spew
   version: 782f4967f2dc4564575ca782fe2d04090b5faca8
   subpackages:
@@ -59,12 +63,16 @@ imports:
   version: f2b4162afba35581b6d4a50d3b8f34e33c144682
 - name: github.com/mattbaird/jsonpatch
   version: 81af80346b1a01caae0cbc27fd3c1ba5b11e189f
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c182affec369e30f25d3eb8cd8a478dee585ae7d
+  subpackages:
+  - pbutil
 - name: github.com/modern-go/concurrent
   version: bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94
 - name: github.com/modern-go/reflect2
   version: 05fbef0ca5da472bbf96c9322b84a53edc03c9fd
 - name: github.com/operator-framework/operator-sdk
-  version: 175a82edae514f57f597110af5447d3f9b1c0fc3
+  version: 15244d60ef7e328531a4f150a05b1fdabf9cc1ae
   subpackages:
   - pkg/k8sutil
   - version
@@ -72,6 +80,28 @@ imports:
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
+- name: github.com/prometheus/client_golang
+  version: d2ead25884778582e740573999f7b07f47e171b4
+  subpackages:
+  - prometheus
+  - prometheus/internal
+  - prometheus/promhttp
+- name: github.com/prometheus/client_model
+  version: f287a105a20ec685d797f65cd0ce8fbeaef42da1
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 2998b132700a7d019ff618c06a234b47c1f3f681
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: b1a0a9a36d7453ba0f62578b99712f3a6c5f82d1
+  subpackages:
+  - internal/util
+  - nfs
+  - xfs
 - name: github.com/spf13/pflag
   version: 298182f68c66c05229eb03ac171abe6e309ee79a
 - name: go.uber.org/atomic
@@ -123,7 +153,7 @@ imports:
   subpackages:
   - rate
 - name: golang.org/x/tools
-  version: 3576414c54a492fc48cd913814eb209914c717f0
+  version: 158f3dcaf6fd34726c03eaeec90da41c62dd9697
 - name: google.golang.org/appengine
   version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
@@ -299,7 +329,7 @@ imports:
   subpackages:
   - pkg/util/proto
 - name: sigs.k8s.io/controller-runtime
-  version: 5fd1e9e9fac5261e9ad9d47c375afc014fc31d21
+  version: f6f0bc9611363b43664d08fb097ab13243ef621d
   subpackages:
   - pkg/cache
   - pkg/cache/internal
@@ -311,9 +341,11 @@ imports:
   - pkg/event
   - pkg/handler
   - pkg/internal/controller
+  - pkg/internal/controller/metrics
   - pkg/internal/recorder
   - pkg/leaderelection
   - pkg/manager
+  - pkg/metrics
   - pkg/patch
   - pkg/predicate
   - pkg/reconcile
@@ -325,5 +357,6 @@ imports:
   - pkg/source/internal
   - pkg/webhook/admission
   - pkg/webhook/admission/types
+  - pkg/webhook/internal/metrics
   - pkg/webhook/types
 testImports: []
