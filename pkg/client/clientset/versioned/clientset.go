@@ -8,9 +8,9 @@
 package versioned
 
 import (
-	enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1alpha1"
+	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1beta1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/iot/v1alpha1"
-	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1alpha1"
+	userv1beta1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1beta1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -18,35 +18,35 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	EnmasseV1alpha1() enmassev1alpha1.EnmasseV1alpha1Interface
+	EnmasseV1beta1() enmassev1beta1.EnmasseV1beta1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Enmasse() enmassev1alpha1.EnmasseV1alpha1Interface
+	Enmasse() enmassev1beta1.EnmasseV1beta1Interface
 	IotV1alpha1() iotv1alpha1.IotV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
 	Iot() iotv1alpha1.IotV1alpha1Interface
-	UserV1alpha1() userv1alpha1.UserV1alpha1Interface
+	UserV1beta1() userv1beta1.UserV1beta1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	User() userv1alpha1.UserV1alpha1Interface
+	User() userv1beta1.UserV1beta1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	enmasseV1alpha1 *enmassev1alpha1.EnmasseV1alpha1Client
-	iotV1alpha1     *iotv1alpha1.IotV1alpha1Client
-	userV1alpha1    *userv1alpha1.UserV1alpha1Client
+	enmasseV1beta1 *enmassev1beta1.EnmasseV1beta1Client
+	iotV1alpha1    *iotv1alpha1.IotV1alpha1Client
+	userV1beta1    *userv1beta1.UserV1beta1Client
 }
 
-// EnmasseV1alpha1 retrieves the EnmasseV1alpha1Client
-func (c *Clientset) EnmasseV1alpha1() enmassev1alpha1.EnmasseV1alpha1Interface {
-	return c.enmasseV1alpha1
+// EnmasseV1beta1 retrieves the EnmasseV1beta1Client
+func (c *Clientset) EnmasseV1beta1() enmassev1beta1.EnmasseV1beta1Interface {
+	return c.enmasseV1beta1
 }
 
 // Deprecated: Enmasse retrieves the default version of EnmasseClient.
 // Please explicitly pick a version.
-func (c *Clientset) Enmasse() enmassev1alpha1.EnmasseV1alpha1Interface {
-	return c.enmasseV1alpha1
+func (c *Clientset) Enmasse() enmassev1beta1.EnmasseV1beta1Interface {
+	return c.enmasseV1beta1
 }
 
 // IotV1alpha1 retrieves the IotV1alpha1Client
@@ -60,15 +60,15 @@ func (c *Clientset) Iot() iotv1alpha1.IotV1alpha1Interface {
 	return c.iotV1alpha1
 }
 
-// UserV1alpha1 retrieves the UserV1alpha1Client
-func (c *Clientset) UserV1alpha1() userv1alpha1.UserV1alpha1Interface {
-	return c.userV1alpha1
+// UserV1beta1 retrieves the UserV1beta1Client
+func (c *Clientset) UserV1beta1() userv1beta1.UserV1beta1Interface {
+	return c.userV1beta1
 }
 
 // Deprecated: User retrieves the default version of UserClient.
 // Please explicitly pick a version.
-func (c *Clientset) User() userv1alpha1.UserV1alpha1Interface {
-	return c.userV1alpha1
+func (c *Clientset) User() userv1beta1.UserV1beta1Interface {
+	return c.userV1beta1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -87,7 +87,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.enmasseV1alpha1, err = enmassev1alpha1.NewForConfig(&configShallowCopy)
+	cs.enmasseV1beta1, err = enmassev1beta1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	cs.userV1alpha1, err = userv1alpha1.NewForConfig(&configShallowCopy)
+	cs.userV1beta1, err = userv1beta1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +111,9 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.enmasseV1alpha1 = enmassev1alpha1.NewForConfigOrDie(c)
+	cs.enmasseV1beta1 = enmassev1beta1.NewForConfigOrDie(c)
 	cs.iotV1alpha1 = iotv1alpha1.NewForConfigOrDie(c)
-	cs.userV1alpha1 = userv1alpha1.NewForConfigOrDie(c)
+	cs.userV1beta1 = userv1beta1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -122,9 +122,9 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.enmasseV1alpha1 = enmassev1alpha1.New(c)
+	cs.enmasseV1beta1 = enmassev1beta1.New(c)
 	cs.iotV1alpha1 = iotv1alpha1.New(c)
-	cs.userV1alpha1 = userv1alpha1.New(c)
+	cs.userV1beta1 = userv1beta1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

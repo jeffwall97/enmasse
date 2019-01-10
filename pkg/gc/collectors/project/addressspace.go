@@ -6,7 +6,7 @@
 package project
 
 import (
-    corev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
+    corev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

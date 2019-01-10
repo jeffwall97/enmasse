@@ -7,7 +7,7 @@ package project
 
 import (
     "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
-    userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1alpha1"
+    userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
     "k8s.io/apimachinery/pkg/api/errors"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/apimachinery/pkg/types"

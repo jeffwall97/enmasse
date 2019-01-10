@@ -9,12 +9,12 @@ package fake
 
 import (
 	clientset "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
-	enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1alpha1"
-	fakeenmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1alpha1/fake"
+	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1beta1"
+	fakeenmassev1beta1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/enmasse/v1beta1/fake"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/iot/v1alpha1"
 	fakeiotv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/iot/v1alpha1/fake"
-	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1alpha1"
-	fakeuserv1alpha1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1alpha1/fake"
+	userv1beta1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1beta1"
+	fakeuserv1beta1 "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/typed/user/v1beta1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -64,14 +64,14 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// EnmasseV1alpha1 retrieves the EnmasseV1alpha1Client
-func (c *Clientset) EnmasseV1alpha1() enmassev1alpha1.EnmasseV1alpha1Interface {
-	return &fakeenmassev1alpha1.FakeEnmasseV1alpha1{Fake: &c.Fake}
+// EnmasseV1beta1 retrieves the EnmasseV1beta1Client
+func (c *Clientset) EnmasseV1beta1() enmassev1beta1.EnmasseV1beta1Interface {
+	return &fakeenmassev1beta1.FakeEnmasseV1beta1{Fake: &c.Fake}
 }
 
-// Enmasse retrieves the EnmasseV1alpha1Client
-func (c *Clientset) Enmasse() enmassev1alpha1.EnmasseV1alpha1Interface {
-	return &fakeenmassev1alpha1.FakeEnmasseV1alpha1{Fake: &c.Fake}
+// Enmasse retrieves the EnmasseV1beta1Client
+func (c *Clientset) Enmasse() enmassev1beta1.EnmasseV1beta1Interface {
+	return &fakeenmassev1beta1.FakeEnmasseV1beta1{Fake: &c.Fake}
 }
 
 // IotV1alpha1 retrieves the IotV1alpha1Client
@@ -84,12 +84,12 @@ func (c *Clientset) Iot() iotv1alpha1.IotV1alpha1Interface {
 	return &fakeiotv1alpha1.FakeIotV1alpha1{Fake: &c.Fake}
 }
 
-// UserV1alpha1 retrieves the UserV1alpha1Client
-func (c *Clientset) UserV1alpha1() userv1alpha1.UserV1alpha1Interface {
-	return &fakeuserv1alpha1.FakeUserV1alpha1{Fake: &c.Fake}
+// UserV1beta1 retrieves the UserV1beta1Client
+func (c *Clientset) UserV1beta1() userv1beta1.UserV1beta1Interface {
+	return &fakeuserv1beta1.FakeUserV1beta1{Fake: &c.Fake}
 }
 
-// User retrieves the UserV1alpha1Client
-func (c *Clientset) User() userv1alpha1.UserV1alpha1Interface {
-	return &fakeuserv1alpha1.FakeUserV1alpha1{Fake: &c.Fake}
+// User retrieves the UserV1beta1Client
+func (c *Clientset) User() userv1beta1.UserV1beta1Interface {
+	return &fakeuserv1beta1.FakeUserV1beta1{Fake: &c.Fake}
 }

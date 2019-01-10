@@ -8,9 +8,9 @@ package iotproject
 import (
 	"context"
 	"fmt"
-	enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1alpha1"
+	enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
-	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1alpha1"
+	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
