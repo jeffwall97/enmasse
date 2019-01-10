@@ -12,7 +12,7 @@ import (
     "k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-const GroupVersion = "v1alpha1"
+const GroupVersion = "v1beta1"
 
 var SchemeGroupVersion = schema.GroupVersion{Group: enmasse.GroupName, Version: GroupVersion}
 
