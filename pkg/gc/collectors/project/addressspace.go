@@ -16,7 +16,7 @@ func (p *projectCollector) collectAddressSpaces() error {
 
     opts := metav1.ListOptions{}
 
-    list, err := p.client.EnmasseV1alpha1().
+    list, err := p.client.EnmasseV1beta1().
         AddressSpaces(p.namespace).
         List(opts)
 

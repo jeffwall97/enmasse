@@ -20,7 +20,7 @@ func (p *projectCollector) collectMessagingUsers() error {
 
     opts := metav1.ListOptions{}
 
-    list, err := p.client.UserV1alpha1().
+    list, err := p.client.UserV1beta1().
         MessagingUsers(p.namespace).
         List(opts)
 
@@ -122,7 +122,7 @@ func (p *projectCollector) findOwnerProject(namespace string, owner *metav1.Owne
 
 func (p *projectCollector) deleteMessagingUser(user *userv1alpha1.MessagingUser, uid *types.UID) error {
     log.Info("Deleting Messaging User", "MessagingUser", user, "UID", uid)
-    return p.client.UserV1alpha1().
+    return p.client.UserV1beta1().
         MessagingUsers(user.Namespace).
         Delete(user.Name, &metav1.DeleteOptions{
             Preconditions: &metav1.Preconditions{UID: uid},
