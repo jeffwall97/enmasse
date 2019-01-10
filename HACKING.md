@@ -105,7 +105,16 @@ oc apply -f templates/build/enmasse-latest/install/bundles/enmasse-with-standard
 #### Run single system test
 
     make SYSTEMTEST_ARGS="io.enmasse.systemtest.standard.QueueTest#testCreateDeleteQueue" systemtests
-    
+
+### Adding / Updating go dependencies
+
+This project currently uses "glide" to vendor go sources. Change dependencies in the file `glide.yaml` and then run:
+
+    glide up -v
+    git add --all vendor
+    git add glide.lock
+    git commit
+
 ## Reference
 
 This is a reference of the different make targets and options that can be set when building an
