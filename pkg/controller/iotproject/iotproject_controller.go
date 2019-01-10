@@ -8,9 +8,9 @@ package iotproject
 import (
 	"context"
 	"fmt"
-	enmassev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
+	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
-	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
+	userv1beta1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -74,7 +74,7 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
 		IsController: true,
 	}
 
-	err = c.Watch(&source.Kind{Type: &enmassev1alpha1.AddressSpace{}},
+	err = c.Watch(&source.Kind{Type: &enmassev1beta1.AddressSpace{}},
 		&handler.EnqueueRequestsFromMapFunc{
 			ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 
@@ -269,7 +269,7 @@ func (r *ReconcileIoTProject) reconcileProvided(ctx context.Context, request *re
 
 func (r *ReconcileIoTProject) processProvided(strategy *iotv1alpha1.ProvidedDownstreamStrategy, endpointMode iotv1alpha1.EndpointMode, endpointName string, portName string) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
 
-	addressSpace := &enmassev1alpha1.AddressSpace{}
+	addressSpace := &enmassev1beta1.AddressSpace{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Namespace: strategy.Namespace, Name: strategy.AddressSpaceName}, addressSpace)
 
 	// addressSpace, err := r.enmasseclientset.EnmasseV1alpha1().AddressSpaces(strategy.Namespace).Get(strategy.AddressSpaceName, v1.GetOptions{})
@@ -286,7 +286,7 @@ func extractEndpointInformation(
 	endpointMode iotv1alpha1.EndpointMode,
 	portName string,
 	credentials *iotv1alpha1.Credentials,
-	addressSpace *enmassev1alpha1.AddressSpace,
+	addressSpace *enmassev1beta1.AddressSpace,
 	forceTls *bool,
 ) (*iotv1alpha1.ExternalDownstreamStrategy, error) {
 
@@ -307,7 +307,7 @@ func extractEndpointInformation(
 
 		foundEndpoint = true
 
-		var ports []enmassev1alpha1.Port
+		var ports []enmassev1beta1.Port
 
 		switch endpointMode {
 		case iotv1alpha1.Service:
@@ -351,7 +351,7 @@ func extractEndpointInformation(
 	return endpoint, nil
 }
 
-func findEndpointSpec(addressSpace *enmassev1alpha1.AddressSpace, endpointStatus *enmassev1alpha1.EndpointStatus) *enmassev1alpha1.EndpointSpec {
+func findEndpointSpec(addressSpace *enmassev1beta1.AddressSpace, endpointStatus *enmassev1beta1.EndpointStatus) *enmassev1beta1.EndpointSpec {
 	for _, end := range addressSpace.Spec.Ednpoints {
 		if end.Name != endpointStatus.Name {
 			continue
@@ -363,9 +363,9 @@ func findEndpointSpec(addressSpace *enmassev1alpha1.AddressSpace, endpointStatus
 
 // get a an estimate if TLS should be enabled for a port, or not
 func isTls(
-	addressSpace *enmassev1alpha1.AddressSpace,
-	endpointStatus *enmassev1alpha1.EndpointStatus,
-	port *enmassev1alpha1.Port,
+	addressSpace *enmassev1beta1.AddressSpace,
+	endpointStatus *enmassev1beta1.EndpointStatus,
+	port *enmassev1beta1.Port,
 	forceTls *bool) (bool, error) {
 
 	if forceTls != nil {
@@ -411,12 +411,12 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 
 	strategy := project.Spec.DownstreamStrategy.ManagedDownstreamStrategy
 
-	addressSpace := &enmassev1alpha1.AddressSpace{
+	addressSpace := &enmassev1beta1.AddressSpace{
 		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName},
 	}
 
 	_, err := controllerutil.CreateOrUpdate(ctx, r.client, addressSpace, func(existing runtime.Object) error {
-		existingAddressSpace := existing.(*enmassev1alpha1.AddressSpace)
+		existingAddressSpace := existing.(*enmassev1beta1.AddressSpace)
 
 		if err := r.ensureOwnerIsSet(project, existingAddressSpace); err != nil {
 			return err
@@ -432,12 +432,12 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 		return nil, err
 	}
 
-	adapterUser := &userv1alpha1.MessagingUser{
+	adapterUser := &userv1beta1.MessagingUser{
 		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + ".adapter"},
 	}
 
 	_, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
-		existingUser := existing.(*userv1alpha1.MessagingUser)
+		existingUser := existing.(*userv1beta1.MessagingUser)
 
 		if err := r.ensureOwnerIsSet(project, existingUser); err != nil {
 			return err
@@ -459,7 +459,7 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 		   return nil, err
 	   }
 
-	   found := &enmassev1alpha1.AddressSpace{}
+	   found := &enmassev1beta1.AddressSpace{}
 	   err := r.client.Get(ctx, types.NamespacedName{Name: addressSpace.Name, Namespace: addressSpace.Namespace}, found)
 	   if err != nil && errors.IsNotFound(err) {
 		   log.Info("Creating a new AddressSpace", "AddressSpace.Namespace", addressSpace.Namespace, "AddressSpace.Name", addressSpace.Name)
@@ -481,13 +481,13 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 	return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", &credentials, addressSpace, &forceTls)
 }
 
-func reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, existing *enmassev1alpha1.AddressSpace) error {
+func reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, existing *enmassev1beta1.AddressSpace) error {
 
 	if existing.CreationTimestamp.IsZero() {
 		existing.ObjectMeta.Labels = project.Labels
 	}
 
-	existing.Spec = enmassev1alpha1.AddressSpaceSpec{
+	existing.Spec = enmassev1beta1.AddressSpaceSpec{
 		Type: "standard",
 		Plan: "standard-unlimited",
 	}
@@ -495,22 +495,22 @@ func reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha
 	return nil
 }
 
-func reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, existing *userv1alpha1.MessagingUser) error {
+func reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, existing *userv1beta1.MessagingUser) error {
 
 	username := "adapter"
 	password := "bar"
 	tenant := project.Namespace + "." + project.Name
 
-	existing.Spec = userv1alpha1.MessagingUserSpec{
+	existing.Spec = userv1beta1.MessagingUserSpec{
 
 		Username: username,
 
-		Authentication: userv1alpha1.AuthenticationSpec{
+		Authentication: userv1beta1.AuthenticationSpec{
 			Type:     "password",
 			Password: password,
 		},
 
-		Authorization: []userv1alpha1.AuthorizationSpec{
+		Authorization: []userv1beta1.AuthorizationSpec{
 			{
 				Addresses: []string{
 					"telemetry/" + tenant + "/#",
