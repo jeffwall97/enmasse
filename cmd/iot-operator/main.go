@@ -55,7 +55,7 @@ func main() {
         os.Exit(1)
     }
 
-    mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
+    mgr, err := manager.New(cfg, manager.Options{Namespace: namespace, Scheme: scheme.Scheme})
     if err != nil {
         log.Error(err, "")
         os.Exit(1)
@@ -65,8 +65,15 @@ func main() {
 
     // register APIs
 
-    enmassescheme.AddToScheme(scheme.Scheme)
-    enmassescheme.AddToScheme(mgr.GetScheme())
+    if err := enmassescheme.AddToScheme(scheme.Scheme); err != nil {
+        log.Error(err, "Failed to register schema")
+        os.Exit(1)
+    }
+
+    if err := enmassescheme.AddToScheme(mgr.GetScheme()); err != nil {
+        log.Error(err, "Failed to register schema with manager")
+        os.Exit(1)
+    }
 
     // register controller
 
