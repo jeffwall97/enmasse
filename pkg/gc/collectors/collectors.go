@@ -6,5 +6,5 @@
 package collectors
 
 type Collector interface {
-    CollectOnce() error
+	CollectOnce() error
 }

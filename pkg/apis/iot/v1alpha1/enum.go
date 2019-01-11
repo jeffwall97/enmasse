@@ -6,47 +6,47 @@
 package v1alpha1
 
 import (
-    "bytes"
-    "encoding/json"
+	"bytes"
+	"encoding/json"
 )
 
 type EndpointMode int
 
 const (
-    Service EndpointMode = iota
-    External
+	Service EndpointMode = iota
+	External
 )
 
 func (et EndpointMode) String() string {
-    return toString[et]
+	return toString[et]
 }
 
 var toString = map[EndpointMode]string{
-    Service:  "service",
-    External: "external",
+	Service:  "service",
+	External: "external",
 }
 
 var toId = map[string]EndpointMode{
-    "service":  Service,
-    "external": External,
+	"service":  Service,
+	"external": External,
 }
 
 func (et *EndpointMode) MarshalJSON() ([]byte, error) {
-    buffer := bytes.NewBufferString(`"`)
-    buffer.WriteString(toString[*et])
-    buffer.WriteString(`"`)
-    return buffer.Bytes(), nil
+	buffer := bytes.NewBufferString(`"`)
+	buffer.WriteString(toString[*et])
+	buffer.WriteString(`"`)
+	return buffer.Bytes(), nil
 }
 
 func (et *EndpointMode) UnmarshalJSON(data []byte) error {
-    var value string
-    err := json.Unmarshal(data, &value)
+	var value string
+	err := json.Unmarshal(data, &value)
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
-    *et = toId[value]
+	*et = toId[value]
 
-    return nil
+	return nil
 }

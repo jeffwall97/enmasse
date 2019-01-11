@@ -6,12 +6,12 @@
 package controller
 
 import (
-    "github.com/enmasseproject/enmasse/pkg/controller/iotproject"
+	"github.com/enmasseproject/enmasse/pkg/controller/iotproject"
 )
 
 func init() {
 
-    // add ourselves to the list of controllers
+	// add ourselves to the list of controllers
 
-    AddToManagerFuncs = append(AddToManagerFuncs, iotproject.Add)
+	AddToManagerFuncs = append(AddToManagerFuncs, iotproject.Add)
 }

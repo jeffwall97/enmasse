@@ -39,15 +39,15 @@ func Add(mgr manager.Manager) error {
 func newReconciler(mgr manager.Manager) *ReconcileIoTProject {
 
 	/*
-	   cfg, err := config.GetConfig()
-	   if err != nil {
-		   klog.Fatalf("Error getting in-cluster config: %v", err.Error())
-	   }
+		   cfg, err := config.GetConfig()
+		   if err != nil {
+			   klog.Fatalf("Error getting in-cluster config: %v", err.Error())
+		   }
 
-	   clientset, err := enmasse.NewForConfig(cfg)
-	   if err != nil {
-		   klog.Fatalf("Error building EnMasse client: t%v", err.Error())
-	   }
+		   clientset, err := enmasse.NewForConfig(cfg)
+		   if err != nil {
+			   klog.Fatalf("Error building EnMasse client: t%v", err.Error())
+		   }
 	*/
 
 	return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme()}
@@ -454,21 +454,21 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 	}
 
 	/*
-	   addressSpace := newAddressSpace(project, strategy)
-	   if err := controllerutil.SetControllerReference(project, addressSpace, r.scheme); err != nil {
-		   return nil, err
-	   }
-
-	   found := &enmassev1beta1.AddressSpace{}
-	   err := r.client.Get(ctx, types.NamespacedName{Name: addressSpace.Name, Namespace: addressSpace.Namespace}, found)
-	   if err != nil && errors.IsNotFound(err) {
-		   log.Info("Creating a new AddressSpace", "AddressSpace.Namespace", addressSpace.Namespace, "AddressSpace.Name", addressSpace.Name)
-		   if err = r.client.Create(context.TODO(), addressSpace); err != nil {
+		   addressSpace := newAddressSpace(project, strategy)
+		   if err := controllerutil.SetControllerReference(project, addressSpace, r.scheme); err != nil {
 			   return nil, err
 		   }
-	   }
 
-	   credentials := newMessagingUser(project, addressSpace)
+		   found := &enmassev1beta1.AddressSpace{}
+		   err := r.client.Get(ctx, types.NamespacedName{Name: addressSpace.Name, Namespace: addressSpace.Namespace}, found)
+		   if err != nil && errors.IsNotFound(err) {
+			   log.Info("Creating a new AddressSpace", "AddressSpace.Namespace", addressSpace.Namespace, "AddressSpace.Name", addressSpace.Name)
+			   if err = r.client.Create(context.TODO(), addressSpace); err != nil {
+				   return nil, err
+			   }
+		   }
+
+		   credentials := newMessagingUser(project, addressSpace)
 	*/
 
 	credentials := iotv1alpha1.Credentials{

@@ -6,5 +6,5 @@
 package iot
 
 const (
-    GroupName = "iot.enmasse.io"
+	GroupName = "iot.enmasse.io"
 )

@@ -6,5 +6,5 @@
 package enmasse
 
 const (
-    GroupName = "enmasse.io"
+	GroupName = "enmasse.io"
 )

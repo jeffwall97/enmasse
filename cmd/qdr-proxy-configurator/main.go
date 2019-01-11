@@ -6,107 +6,107 @@
 package main
 
 import (
-    "flag"
-    enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
-    "k8s.io/client-go/kubernetes"
-    "k8s.io/client-go/rest"
-    "k8s.io/klog"
-    "os"
+	"flag"
+	enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/klog"
+	"os"
 
-    "time"
+	"time"
 
-    informers "github.com/enmasseproject/enmasse/pkg/client/informers/externalversions"
+	informers "github.com/enmasseproject/enmasse/pkg/client/informers/externalversions"
 
-    "sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 var (
-    ephermalCertBase string
+	ephermalCertBase string
 )
 
 func initLog() {
 
-    // private copy of klog flags, as they collide with glog and would panic
+	// private copy of klog flags, as they collide with glog and would panic
 
-    var flags flag.FlagSet
-    klog.InitFlags(&flags)
+	var flags flag.FlagSet
+	klog.InitFlags(&flags)
 
-    // parse main arguments
+	// parse main arguments
 
-    flag.Parse()
+	flag.Parse()
 
-    // copy over verbose flag from main app to klog
+	// copy over verbose flag from main app to klog
 
-    v := os.Getenv("VERBOSE")
+	v := os.Getenv("VERBOSE")
 
-    // if we have a setting, copy over to klog flags
+	// if we have a setting, copy over to klog flags
 
-    if v != "" {
-        if err := flags.Set("v", v); err != nil {
-            klog.Fatalf("klog init: Failed to set log verbosity: %v", err.Error())
-        }
-    }
+	if v != "" {
+		if err := flags.Set("v", v); err != nil {
+			klog.Fatalf("klog init: Failed to set log verbosity: %v", err.Error())
+		}
+	}
 
-    // setup klog output
+	// setup klog output
 
-    klog.SetOutput(os.Stdout)
+	klog.SetOutput(os.Stdout)
 }
 
 func main() {
 
-    // init log system
-    initLog()
+	// init log system
+	initLog()
 
-    stopCh := signals.SetupSignalHandler()
+	stopCh := signals.SetupSignalHandler()
 
-    klog.Infof("Starting up...")
+	klog.Infof("Starting up...")
 
-    if ephermalCertBase != "" {
-        fi, err := os.Stat(ephermalCertBase)
-        if err != nil {
-            klog.Fatalf("Emphermal certificate base is configured, but unable to access: %v", err.Error())
-        }
-        if !fi.IsDir() {
-            klog.Fatalln("Emphermal certificate base is configured, but is not a directory")
-        }
-    }
+	if ephermalCertBase != "" {
+		fi, err := os.Stat(ephermalCertBase)
+		if err != nil {
+			klog.Fatalf("Emphermal certificate base is configured, but unable to access: %v", err.Error())
+		}
+		if !fi.IsDir() {
+			klog.Fatalln("Emphermal certificate base is configured, but is not a directory")
+		}
+	}
 
-    cfg, err := rest.InClusterConfig()
-    if err != nil {
-        klog.Fatalf("Error getting in-cluster config: %v", err.Error())
-    }
+	cfg, err := rest.InClusterConfig()
+	if err != nil {
+		klog.Fatalf("Error getting in-cluster config: %v", err.Error())
+	}
 
-    kubeClient, err := kubernetes.NewForConfig(cfg)
-    if err != nil {
-        klog.Fatalf("Error building kubernetes client: %v", err.Error())
-    }
+	kubeClient, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building kubernetes client: %v", err.Error())
+	}
 
-    enmasseClient, err := enmasse.NewForConfig(cfg)
-    if err != nil {
-        klog.Fatalf("Error building EnMasse client: %v", err.Error())
-    }
+	enmasseClient, err := enmasse.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building EnMasse client: %v", err.Error())
+	}
 
-    enmasseInformerFactory := informers.NewSharedInformerFactory(enmasseClient, time.Second*30)
+	enmasseInformerFactory := informers.NewSharedInformerFactory(enmasseClient, time.Second*30)
 
-    configurator := NewConfigurator(
-        kubeClient, enmasseClient,
-        enmasseInformerFactory.Iot().V1alpha1().IoTProjects(),
-        ephermalCertBase,
-    )
+	configurator := NewConfigurator(
+		kubeClient, enmasseClient,
+		enmasseInformerFactory.Iot().V1alpha1().IoTProjects(),
+		ephermalCertBase,
+	)
 
-    enmasseInformerFactory.Start(stopCh)
+	enmasseInformerFactory.Start(stopCh)
 
-    if err = configurator.Run(2, stopCh); err != nil {
-        klog.Fatalf("Failed running configurator: %v", err.Error())
-    }
+	if err = configurator.Run(2, stopCh); err != nil {
+		klog.Fatalf("Failed running configurator: %v", err.Error())
+	}
 }
 
 func init() {
 
-    ephermalCertBase = "/var/qdr-certs"
+	ephermalCertBase = "/var/qdr-certs"
 
-    if value, present := os.LookupEnv("EPHERMAL_CERT_BASE"); present {
-        ephermalCertBase = value
-    }
+	if value, present := os.LookupEnv("EPHERMAL_CERT_BASE"); present {
+		ephermalCertBase = value
+	}
 
 }

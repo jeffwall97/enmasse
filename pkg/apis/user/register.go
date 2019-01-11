@@ -6,5 +6,5 @@
 package user
 
 const (
-    GroupName = "user.enmasse.io"
+	GroupName = "user.enmasse.io"
 )

@@ -6,88 +6,88 @@
 package main
 
 import (
-    "flag"
-    "fmt"
-    enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
-    "github.com/operator-framework/operator-sdk/pkg/k8sutil"
-    "k8s.io/client-go/kubernetes/scheme"
-    "os"
-    "runtime"
+	"flag"
+	"fmt"
+	enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
+	"k8s.io/client-go/kubernetes/scheme"
+	"os"
+	"runtime"
 
-    "github.com/enmasseproject/enmasse/pkg/controller"
-    sdkVersion "github.com/operator-framework/operator-sdk/version"
-    _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-    "sigs.k8s.io/controller-runtime/pkg/client/config"
-    "sigs.k8s.io/controller-runtime/pkg/manager"
-    logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-    "sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"github.com/enmasseproject/enmasse/pkg/controller"
+	sdkVersion "github.com/operator-framework/operator-sdk/version"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 var log = logf.Log.WithName("cmd")
 
 func printVersion() {
-    log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
-    log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
-    log.Info(fmt.Sprintf("operator-sdk Version: %v", sdkVersion.Version))
+	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
+	log.Info(fmt.Sprintf("operator-sdk Version: %v", sdkVersion.Version))
 }
 
 func main() {
-    flag.Parse()
+	flag.Parse()
 
-    logf.SetLogger(logf.ZapLogger(true /* FIXME: switch to production, or make configurable */))
+	logf.SetLogger(logf.ZapLogger(true /* FIXME: switch to production, or make configurable */))
 
-    printVersion()
+	printVersion()
 
-    /*
-    namespace, err:= k8sutil.GetWatchNamespace()
-    if err != nil {
-        log.Error(err, "failed to get watch namespace")
-        os.Exit(1)
-    }
-    */
+	/*
+	   namespace, err:= k8sutil.GetWatchNamespace()
+	   if err != nil {
+	       log.Error(err, "failed to get watch namespace")
+	       os.Exit(1)
+	   }
+	*/
 
-    // TODO: replace when enmasse#1280 is fixed
-    namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
+	// TODO: replace when enmasse#1280 is fixed
+	namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
 
-    cfg, err := config.GetConfig()
-    if err != nil {
-        log.Error(err, "Failed to get configuration")
-        os.Exit(1)
-    }
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Error(err, "Failed to get configuration")
+		os.Exit(1)
+	}
 
-    mgr, err := manager.New(cfg, manager.Options{Namespace: namespace, Scheme: scheme.Scheme})
-    if err != nil {
-        log.Error(err, "")
-        os.Exit(1)
-    }
+	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace, Scheme: scheme.Scheme})
+	if err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
 
-    log.Info("Registering components...")
+	log.Info("Registering components...")
 
-    // register APIs
+	// register APIs
 
-    if err := enmassescheme.AddToScheme(scheme.Scheme); err != nil {
-        log.Error(err, "Failed to register schema")
-        os.Exit(1)
-    }
+	if err := enmassescheme.AddToScheme(scheme.Scheme); err != nil {
+		log.Error(err, "Failed to register schema")
+		os.Exit(1)
+	}
 
-    if err := enmassescheme.AddToScheme(mgr.GetScheme()); err != nil {
-        log.Error(err, "Failed to register schema with manager")
-        os.Exit(1)
-    }
+	if err := enmassescheme.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "Failed to register schema with manager")
+		os.Exit(1)
+	}
 
-    // register controller
+	// register controller
 
-    if err := controller.AddToManager(mgr); err != nil {
-        log.Error(err, "Failed to register controller")
-        os.Exit(1)
-    }
+	if err := controller.AddToManager(mgr); err != nil {
+		log.Error(err, "Failed to register controller")
+		os.Exit(1)
+	}
 
-    // starting ...
+	// starting ...
 
-    log.Info("Starting the operator")
+	log.Info("Starting the operator")
 
-    if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-        log.Error(err, "manager exited non-zero")
-        os.Exit(1)
-    }
+	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+		log.Error(err, "manager exited non-zero")
+		os.Exit(1)
+	}
 }

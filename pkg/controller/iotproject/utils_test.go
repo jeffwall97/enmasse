@@ -7,28 +7,28 @@ package iotproject
 
 import "testing"
 
-var userTests = [] struct {
-    input        string
-    addressSpace string
-    username     string
-    err          bool
+var userTests = []struct {
+	input        string
+	addressSpace string
+	username     string
+	err          bool
 }{
-    {"user", "", "", true},
-    {"addressspace.user", "addressspace", "user", false},
+	{"user", "", "", true},
+	{"addressspace.user", "addressspace", "user", false},
 }
 
 func TestSplitUser(t *testing.T) {
-    for _, tt := range userTests {
-        addressSpace, username, err := splitUserName(tt.input)
+	for _, tt := range userTests {
+		addressSpace, username, err := splitUserName(tt.input)
 
-        if tt.err && err == nil {
-            t.Errorf("splitUserName(%s): expected error", tt.input)
-        }
-        if tt.addressSpace != addressSpace {
-            t.Errorf("splitUserName(%s): addressSpace - expected: %v", tt.input, tt.addressSpace)
-        }
-        if tt.username != username {
-            t.Errorf("splitUserName(%s): username - expected: %v", tt.input, tt.username)
-        }
-    }
+		if tt.err && err == nil {
+			t.Errorf("splitUserName(%s): expected error", tt.input)
+		}
+		if tt.addressSpace != addressSpace {
+			t.Errorf("splitUserName(%s): addressSpace - expected: %v", tt.input, tt.addressSpace)
+		}
+		if tt.username != username {
+			t.Errorf("splitUserName(%s): username - expected: %v", tt.input, tt.username)
+		}
+	}
 }

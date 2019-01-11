@@ -9,21 +9,21 @@ import "testing"
 
 func TestMulti1(t *testing.T) {
 
-    m := MultiTool{}
+	m := MultiTool{}
 
-    counter := 0
+	counter := 0
 
-    m.Run(func() (b bool, e error) {
-        counter++
-        return true, nil
-    })
-    m.Run(func() (b bool, e error) {
-        counter++
-        return true, nil
-    })
+	m.Run(func() (b bool, e error) {
+		counter++
+		return true, nil
+	})
+	m.Run(func() (b bool, e error) {
+		counter++
+		return true, nil
+	})
 
-    if counter != 2 {
-        t.Errorf("Did not invoke all operations, expected: %d, got: %d", 2, counter)
-    }
+	if counter != 2 {
+		t.Errorf("Did not invoke all operations, expected: %d, got: %d", 2, counter)
+	}
 
 }

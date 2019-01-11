@@ -6,42 +6,42 @@
 package main
 
 import (
-    "flag"
-    enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
-    "github.com/enmasseproject/enmasse/pkg/gc"
-    "github.com/enmasseproject/enmasse/pkg/gc/collectors/project"
-    "github.com/operator-framework/operator-sdk/pkg/k8sutil"
-    "k8s.io/klog"
-    "os"
-    "sigs.k8s.io/controller-runtime/pkg/client/config"
-    logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-    "sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"flag"
+	enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
+	"github.com/enmasseproject/enmasse/pkg/gc"
+	"github.com/enmasseproject/enmasse/pkg/gc/collectors/project"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
+	"k8s.io/klog"
+	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 var log = logf.Log.WithName("cmd")
 
 func main() {
 
-    flag.Parse()
+	flag.Parse()
 
-    logf.SetLogger(logf.ZapLogger(true /* FIXME: switch to production, or make configurable */))
+	logf.SetLogger(logf.ZapLogger(true /* FIXME: switch to production, or make configurable */))
 
-    namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
+	namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
 
-    stopCh := signals.SetupSignalHandler()
+	stopCh := signals.SetupSignalHandler()
 
-    cfg, err := config.GetConfig()
-    if err != nil {
-        log.Error(err, "Failed to get configuration")
-        os.Exit(1)
-    }
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Error(err, "Failed to get configuration")
+		os.Exit(1)
+	}
 
-    enmasseClient, err := enmasse.NewForConfig(cfg)
-    if err != nil {
-        klog.Fatalf("Error building EnMasse client: %v", err.Error())
-    }
+	enmasseClient, err := enmasse.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building EnMasse client: %v", err.Error())
+	}
 
-    gc := gc.NewGarbageCollector()
-    gc.AddCollector(project.NewProjectCollector(enmasseClient, namespace))
-    gc.Run(stopCh);
+	gc := gc.NewGarbageCollector()
+	gc.AddCollector(project.NewProjectCollector(enmasseClient, namespace))
+	gc.Run(stopCh)
 }
