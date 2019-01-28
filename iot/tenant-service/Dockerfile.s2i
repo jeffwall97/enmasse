@@ -1,4 +1,4 @@
-FROM enmasseproject/java-base:8-10
+FROM enmasseproject/java-base:8-11
 
 #
 # A custom base image for including netty-tcnative built against a system provided libssl.
