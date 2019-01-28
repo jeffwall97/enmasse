@@ -26,12 +26,12 @@ type AddressSpaceSpec struct {
 
 	AuthenticationService *AuthenticationService `json:"authenticationService,omitempty"`
 
-	Ednpoints []EndpointSpec `json:"endpoints"`
+	Ednpoints []EndpointSpec `json:"endpoints,omitempty"`
 }
 
 type AuthenticationService struct {
 	Type    string            `json:"type"`
-	Details map[string]Detail `json:"details"`
+	Details map[string]Detail `json:"details,omitempty"`
 }
 
 type Detail interface {
@@ -58,18 +58,18 @@ type ExposeSpec struct {
 type AddressSpaceStatus struct {
 	IsReady bool `json:"isReady"`
 
-	EndpointStatus []EndpointStatus `json:"endpointStatuses"`
+	EndpointStatus []EndpointStatus `json:"endpointStatuses,omitempty"`
 }
 
 type EndpointStatus struct {
 	Name        string `json:"name"`
-	Certificate []byte `json:"cert"`
+	Certificate []byte `json:"cert,omitempty"`
 
 	ServiceHost  string `json:"serviceHost"`
-	ServicePorts []Port `json:"servicePorts"`
+	ServicePorts []Port `json:"servicePorts,omitempty"`
 
 	ExternalHost  string `json:"externalHost"`
-	ExternalPorts []Port `json:"externalPorts"`
+	ExternalPorts []Port `json:"externalPorts,omitempty"`
 }
 
 type Port struct {
