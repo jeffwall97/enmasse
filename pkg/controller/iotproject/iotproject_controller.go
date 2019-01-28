@@ -71,8 +71,10 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
 
 	ownerHandler := ForkedEnqueueRequestForOwner{
 		OwnerType:    &iotv1alpha1.IoTProject{},
-		IsController: true,
+		IsController: false,
 	}
+	// inject schema so that the handlers know the groupKind
+	ownerHandler.InjectScheme(r.scheme)
 
 	err = c.Watch(&source.Kind{Type: &enmassev1beta1.AddressSpace{}},
 		&handler.EnqueueRequestsFromMapFunc{
