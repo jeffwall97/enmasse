@@ -39,19 +39,6 @@ func Add(mgr manager.Manager) error {
 }
 
 func newReconciler(mgr manager.Manager) *ReconcileIoTProject {
-
-	/*
-		   cfg, err := config.GetConfig()
-		   if err != nil {
-			   klog.Fatalf("Error getting in-cluster config: %v", err.Error())
-		   }
-
-		   clientset, err := enmasse.NewForConfig(cfg)
-		   if err != nil {
-			   klog.Fatalf("Error building EnMasse client: t%v", err.Error())
-		   }
-	*/
-
 	return &ReconcileIoTProject{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
@@ -65,6 +52,16 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
 
 	// Watch for changes to primary resource IoTProject
 	err = c.Watch(&source.Kind{Type: &iotv1alpha1.IoTProject{}}, &handler.EnqueueRequestForObject{})
+	if err != nil {
+		return err
+	}
+
+	// watch for addresses
+
+	err = c.Watch(&source.Kind{Type: &enmassev1beta1.Address{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &iotv1alpha1.IoTProject{},
+	})
 	if err != nil {
 		return err
 	}
@@ -85,17 +82,24 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
 		&handler.EnqueueRequestsFromMapFunc{
 			ToRequests: handler.ToRequestsFunc(func(a handler.MapObject) []reconcile.Request {
 
-				log.V(2).Info("Change event", "kind", "AddressSpace", "object", a)
+				l := log.WithValues("kind", "AddressSpace", "object", a)
+
+				l.V(2).Info("Change event")
 
 				// check if we have an owner
 
 				result := ownerHandler.GetOwnerReconcileRequest(a.Meta)
 
 				if result != nil && len(result) > 0 {
-					log.Info("Owned resource")
+					l.Info("Owned resource")
 					// looks like an owned resource ... take this is a result
 					return result
 				}
+
+				/*
+				 * TODO: at this point we are acitvely searching through all IoT projects
+				 *       for all AddressSpaces that change.
+				 */
 
 				// we need to actively look for a mapped resource
 
@@ -103,7 +107,7 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
 				addressSpaceNamespace := a.Meta.GetNamespace()
 				addressSpaceName := a.Meta.GetName()
 
-				log.Info("Looking up IoT project for un-owned addressspace", "AddressSpaceNamespace", addressSpaceNamespace, "AddressSpaceName", addressSpaceName)
+				l.Info("Looking up IoT project for un-owned addressspace")
 
 				// look for an iot project, that references this address space
 
@@ -372,7 +376,7 @@ func findEndpointSpec(addressSpace *enmassev1beta1.AddressSpace, endpointStatus 
 func isTls(
 	addressSpace *enmassev1beta1.AddressSpace,
 	endpointStatus *enmassev1beta1.EndpointStatus,
-	port *enmassev1beta1.Port,
+	_port *enmassev1beta1.Port,
 	forceTls *bool) (bool, error) {
 
 	if forceTls != nil {

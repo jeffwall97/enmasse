@@ -8,11 +8,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"runtime"
+
 	enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"k8s.io/client-go/kubernetes/scheme"
-	"os"
-	"runtime"
 
 	"github.com/enmasseproject/enmasse/pkg/controller"
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
@@ -55,7 +56,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace, Scheme: scheme.Scheme})
+	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)
@@ -67,11 +68,6 @@ func main() {
 
 	if err := enmassescheme.AddToScheme(scheme.Scheme); err != nil {
 		log.Error(err, "Failed to register schema")
-		os.Exit(1)
-	}
-
-	if err := enmassescheme.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "Failed to register schema with manager")
 		os.Exit(1)
 	}
 
