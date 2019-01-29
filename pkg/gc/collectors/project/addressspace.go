@@ -32,7 +32,8 @@ func (p *projectCollector) collectAddressSpaces() error {
 
 	return nil
 }
+
 func (p *projectCollector) checkAddressSpace(as *corev1alpha1.AddressSpace) error {
-	log.Info("Checking adddress space", "AddressSpace", as)
+	log.Info("Checking address space", "AddressSpace", as)
 	return nil
 }

@@ -8,9 +8,11 @@ package iotproject
 import (
 	"context"
 	"fmt"
+
 	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
 	userv1beta1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
+	"github.com/enmasseproject/enmasse/pkg/util"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -74,7 +76,10 @@ func add(mgr manager.Manager, r *ReconcileIoTProject) error {
 		IsController: false,
 	}
 	// inject schema so that the handlers know the groupKind
-	ownerHandler.InjectScheme(r.scheme)
+	err = ownerHandler.InjectScheme(r.scheme)
+	if err != nil {
+		return err
+	}
 
 	err = c.Watch(&source.Kind{Type: &enmassev1beta1.AddressSpace{}},
 		&handler.EnqueueRequestsFromMapFunc{
@@ -394,7 +399,7 @@ func isTls(
 
 }
 
-func (r *ReconcileIoTProject) ensureOwnerIsSet(owner, object v1.Object) error {
+func (r *ReconcileIoTProject) ensureControllerOwnerIsSet(owner, object v1.Object) error {
 
 	ts := object.GetCreationTimestamp()
 	if ts.IsZero() {
@@ -413,6 +418,8 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 
 	strategy := project.Spec.DownstreamStrategy.ManagedDownstreamStrategy
 
+	// reconcile address space
+
 	addressSpace := &enmassev1beta1.AddressSpace{
 		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName},
 	}
@@ -420,13 +427,14 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 	_, err := controllerutil.CreateOrUpdate(ctx, r.client, addressSpace, func(existing runtime.Object) error {
 		existingAddressSpace := existing.(*enmassev1beta1.AddressSpace)
 
-		if err := r.ensureOwnerIsSet(project, existingAddressSpace); err != nil {
+		// FIXME: need to add ourselves in any case
+		if err := r.ensureControllerOwnerIsSet(project, existingAddressSpace); err != nil {
 			return err
 		}
 
 		log.Info("Reconcile address space", "AddressSpace", existingAddressSpace)
 
-		return reconcileAddressSpace(project, strategy, existingAddressSpace)
+		return r.reconcileAddressSpace(project, strategy, existingAddressSpace)
 	})
 
 	if err != nil {
@@ -434,56 +442,99 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 		return nil, err
 	}
 
+	// create a set of addresses
+
+	err = r.reconcileAddressSet(ctx, project, strategy)
+
+	if err != nil {
+		log.Error(err, "Failed to create addresses")
+	}
+
+	// create a new user for protocol adapters
+
+	adapterUserName := "adapter"
 	adapterUser := &userv1beta1.MessagingUser{
-		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + ".adapter"},
+		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + "." + adapterUserName},
+	}
+
+	credentials := iotv1alpha1.Credentials{
+		Username: adapterUserName,
+		Password: "bar", // FIXME: generate better password
 	}
 
 	_, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
 		existingUser := existing.(*userv1beta1.MessagingUser)
 
-		if err := r.ensureOwnerIsSet(project, existingUser); err != nil {
+		if err := r.ensureControllerOwnerIsSet(project, existingUser); err != nil {
 			return err
 		}
 
 		log.Info("Reconcile messaging user", "MessagingUser", existingUser)
 
-		return reconcileAdapterMessagingUser(project, existingUser)
+		return r.reconcileAdapterMessagingUser(project, &credentials, existingUser)
 	})
 
 	if err != nil {
-		log.Error(err, "Failed calling CreateOrUpdate")
+		log.Error(err, "failed to create adapter user")
 		return nil, err
 	}
 
-	/*
-		   addressSpace := newAddressSpace(project, strategy)
-		   if err := controllerutil.SetControllerReference(project, addressSpace, r.scheme); err != nil {
-			   return nil, err
-		   }
-
-		   found := &enmassev1beta1.AddressSpace{}
-		   err := r.client.Get(ctx, types.NamespacedName{Name: addressSpace.Name, Namespace: addressSpace.Namespace}, found)
-		   if err != nil && errors.IsNotFound(err) {
-			   log.Info("Creating a new AddressSpace", "AddressSpace.Namespace", addressSpace.Namespace, "AddressSpace.Name", addressSpace.Name)
-			   if err = r.client.Create(context.TODO(), addressSpace); err != nil {
-				   return nil, err
-			   }
-		   }
-
-		   credentials := newMessagingUser(project, addressSpace)
-	*/
-
-	credentials := iotv1alpha1.Credentials{
-		Username: adapterUser.Spec.Username,
-		Password: "bar",
-	}
+	// extract endpoint information
 
 	forceTls := true
-
 	return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", &credentials, addressSpace, &forceTls)
 }
 
-func reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, existing *enmassev1beta1.AddressSpace) error {
+func (r *ReconcileIoTProject) reconcileAddress(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, addressName string, plan string, typeName string, existing *enmassev1beta1.Address) error {
+
+	existing.Spec.Address = addressName
+	existing.Spec.Plan = plan
+	existing.Spec.Type = typeName
+
+	return nil
+}
+
+func (r *ReconcileIoTProject) createOrUpdateAddress(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, addressBaseName string, plan string, typeName string) error {
+
+	addressName := util.AddressName(project, addressBaseName)
+	addressMetaName := util.EncodeAsMetaName(addressName)
+
+	address := &enmassev1beta1.Address{
+		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + "." + addressMetaName},
+	}
+
+	_, err := controllerutil.CreateOrUpdate(ctx, r.client, address, func(existing runtime.Object) error {
+		existingAddress := existing.(*enmassev1beta1.Address)
+
+		if err := r.ensureControllerOwnerIsSet(project, existingAddress); err != nil {
+			return err
+		}
+
+		return r.reconcileAddress(project, strategy, addressName, plan, typeName, existingAddress)
+	})
+
+	return err
+}
+
+func (r *ReconcileIoTProject) reconcileAddressSet(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy) error {
+
+	mt := util.MultiTool{}
+
+	mt.Run(func() error {
+		return r.createOrUpdateAddress(ctx, project, strategy, "telemetry", "standard-small-anycast", "anycast")
+	})
+	mt.Run(func() error {
+		return r.createOrUpdateAddress(ctx, project, strategy, "event", "standard-small-queue", "queue")
+	})
+	mt.Run(func() error {
+		return r.createOrUpdateAddress(ctx, project, strategy, "control", "standard-small-anycast", "anycast")
+	})
+
+	return mt.Error
+
+}
+
+func (r *ReconcileIoTProject) reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, existing *enmassev1beta1.AddressSpace) error {
 
 	if existing.CreationTimestamp.IsZero() {
 		existing.ObjectMeta.Labels = project.Labels
@@ -497,10 +548,10 @@ func reconcileAddressSpace(project *iotv1alpha1.IoTProject, strategy *iotv1alpha
 	return nil
 }
 
-func reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, existing *userv1beta1.MessagingUser) error {
+func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, credentials *iotv1alpha1.Credentials, existing *userv1beta1.MessagingUser) error {
 
-	username := "adapter"
-	password := "bar"
+	username := credentials.Username
+	password := credentials.Password
 	tenant := project.Namespace + "." + project.Name
 
 	existing.Spec = userv1beta1.MessagingUserSpec{

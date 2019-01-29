@@ -9,6 +9,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+/*
+ * Be careful with the comments in this file. The prefix "+" indicates that this is being processed
+ * by the client generator. The location, empty lines, and other comments in this file may confuse
+ * the generate, and produce a non-version version.
+ */
+
+// ** AddressSpace
+
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -84,4 +92,33 @@ type AddressSpaceList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 
 	Items []AddressSpace `json:"items"`
+}
+
+// ** Address
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type Address struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec AddressSpec `json:"spec"`
+}
+
+type AddressSpec struct {
+	Address      string `json:"address"`
+	AddressSpace string `json:"addressSpace,omitempty"`
+	Type         string `json:"type"`
+	Plan         string `json:"plan"`
+	Topic        string `json:"topic,omitempty"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type AddressList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Items []Address `json:"items"`
 }

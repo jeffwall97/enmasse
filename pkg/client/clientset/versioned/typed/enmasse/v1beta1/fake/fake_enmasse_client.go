@@ -17,6 +17,10 @@ type FakeEnmasseV1beta1 struct {
 	*testing.Fake
 }
 
+func (c *FakeEnmasseV1beta1) Addresses(namespace string) v1beta1.AddressInterface {
+	return &FakeAddresses{c, namespace}
+}
+
 func (c *FakeEnmasseV1beta1) AddressSpaces(namespace string) v1beta1.AddressSpaceInterface {
 	return &FakeAddressSpaces{c, namespace}
 }

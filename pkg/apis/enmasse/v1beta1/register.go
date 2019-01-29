@@ -33,6 +33,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&AddressSpace{},
 		&AddressSpaceList{},
+		&Address{},
+		&AddressList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)

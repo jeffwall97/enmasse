@@ -7,6 +7,14 @@
 
 package v1beta1
 
+// AddressListerExpansion allows custom methods to be added to
+// AddressLister.
+type AddressListerExpansion interface{}
+
+// AddressNamespaceListerExpansion allows custom methods to be added to
+// AddressNamespaceLister.
+type AddressNamespaceListerExpansion interface{}
+
 // AddressSpaceListerExpansion allows custom methods to be added to
 // AddressSpaceLister.
 type AddressSpaceListerExpansion interface{}

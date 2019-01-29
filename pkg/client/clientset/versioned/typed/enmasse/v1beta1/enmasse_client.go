@@ -16,12 +16,17 @@ import (
 
 type EnmasseV1beta1Interface interface {
 	RESTClient() rest.Interface
+	AddressesGetter
 	AddressSpacesGetter
 }
 
 // EnmasseV1beta1Client is used to interact with features provided by the enmasse.io group.
 type EnmasseV1beta1Client struct {
 	restClient rest.Interface
+}
+
+func (c *EnmasseV1beta1Client) Addresses(namespace string) AddressInterface {
+	return newAddresses(c, namespace)
 }
 
 func (c *EnmasseV1beta1Client) AddressSpaces(namespace string) AddressSpaceInterface {

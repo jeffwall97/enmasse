@@ -13,11 +13,11 @@ func TestMulti1(t *testing.T) {
 
 	counter := 0
 
-	m.Run(func() (b bool, e error) {
+	m.Run(func() ( e error) {
 		counter++
-		return true, nil
+		return  nil
 	})
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		counter++
 		return true, nil
 	})

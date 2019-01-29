@@ -13,7 +13,13 @@ type MultiTool struct {
 	Error    error
 }
 
-func (m *MultiTool) Run(operation func() (bool, error)) {
+func (m *MultiTool) Run(operation func() error) {
+	m.RunChange(func() (b bool, e error) {
+		return false, operation()
+	})
+}
+
+func (m *MultiTool) RunChange(operation func() (bool, error)) {
 
 	if m.Error != nil && !m.Continue {
 		return

@@ -44,6 +44,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=enmasse.io, Version=v1beta1
+	case v1beta1.SchemeGroupVersion.WithResource("addresses"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Enmasse().V1beta1().Addresses().Informer()}, nil
 	case v1beta1.SchemeGroupVersion.WithResource("addressspaces"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Enmasse().V1beta1().AddressSpaces().Informer()}, nil
 

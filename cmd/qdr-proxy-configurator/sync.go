@@ -143,10 +143,6 @@ func namedResource(object metav1.Object, name string) qdr.NamedResource {
 	}
 }
 
-func addressName(object metav1.Object, prefix string) string {
-	return prefix + "/" + object.GetNamespace() + "." + object.GetName()
-}
-
 // Convert an object to a map of string/string
 func toMapStringString(v interface{}) (map[string]string, error) {
 
@@ -228,13 +224,13 @@ func (c *Configurator) syncProject(project *v1alpha1.IoTProject) (bool, error) {
 	m := util.MultiTool{}
 
 	if endpoint.TLS {
-		m.Run(func() (b bool, e error) {
+		m.RunChange(func() (b bool, e error) {
 			return c.syncSslProfile(project, endpoint.Certificate)
 		})
 		sslProfileName = resourceName(project, "sslProfile")
 	}
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return c.syncConnector(qdr.Connector{
 			NamedResource: qdr.NamedResource{Name: connectorName},
 			Host:          endpoint.Host,
@@ -246,38 +242,38 @@ func (c *Configurator) syncProject(project *v1alpha1.IoTProject) (bool, error) {
 		})
 	})
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return c.syncLinkRoute(qdr.LinkRoute{
 			NamedResource: namedResource(project, "linkRoute/t"),
 			Direction:     "in",
-			Pattern:       addressName(project, "telemetry") + "/#",
+			Pattern:       util.AddressName(project, "telemetry") + "/#",
 			Connection:    connectorName,
 		})
 	})
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return c.syncLinkRoute(qdr.LinkRoute{
 			NamedResource: namedResource(project, "linkRoute/e"),
 			Direction:     "in",
-			Pattern:       addressName(project, "event") + "/#",
+			Pattern:       util.AddressName(project, "event") + "/#",
 			Connection:    connectorName,
 		})
 	})
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return c.syncLinkRoute(qdr.LinkRoute{
 			NamedResource: namedResource(project, "linkRoute/c_i"),
 			Direction:     "in",
-			Pattern:       addressName(project, "control") + "/#",
+			Pattern:       util.AddressName(project, "control") + "/#",
 			Connection:    connectorName,
 		})
 	})
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return c.syncLinkRoute(qdr.LinkRoute{
 			NamedResource: namedResource(project, "linkRoute/c_o"),
 			Direction:     "out",
-			Pattern:       addressName(project, "control") + "/#",
+			Pattern:       util.AddressName(project, "control") + "/#",
 			Connection:    connectorName,
 		})
 	})
@@ -292,20 +288,20 @@ func (c *Configurator) deleteProject(object metav1.Object) error {
 	m := util.MultiTool{}
 
 	for _, tag := range []string{"t", "e", "c_i", "c_o"} {
-		m.Run(func() (b bool, e error) {
+		m.RunChange(func() (b bool, e error) {
 			return true, c.manage.Delete(qdr.NamedLinkRoute(resourceName(object, "linkRoute/"+tag)))
 		})
 	}
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return true, c.manage.Delete(qdr.NamedConnector(resourceName(object, "connector")))
 	})
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return true, c.manage.Delete(qdr.NamedSslProfile(resourceName(object, "sslProfile")))
 	})
 
-	m.Run(func() (b bool, e error) {
+	m.RunChange(func() (b bool, e error) {
 		return true, c.deleteCertificatesForProject(object)
 	})
 

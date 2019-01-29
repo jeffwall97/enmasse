@@ -1,5 +1,5 @@
-hash: 331a999b92423f4b49ac286aeab7dde2f3ced523c8b9b003e7f6ed5852c908ab
-updated: 2019-01-10T15:53:36.207837079+01:00
+hash: 45a993d745c8331b8582290753687b89e5403b549caf9fdf07834d0960f8ea47
+updated: 2019-01-29T11:13:38.35343336+01:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -43,6 +43,8 @@ imports:
   version: 7d79101e329e5a3adf994758c578dab82b90c017
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
+- name: github.com/google/uuid
+  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/googleapis/gnostic
   version: 0c5108395e2debce0d731cf0287ddf7242066aba
   subpackages:
@@ -72,7 +74,7 @@ imports:
 - name: github.com/modern-go/reflect2
   version: 05fbef0ca5da472bbf96c9322b84a53edc03c9fd
 - name: github.com/operator-framework/operator-sdk
-  version: 15244d60ef7e328531a4f150a05b1fdabf9cc1ae
+  version: cc5fe885869c181d820557bd296f092637fa70af
   subpackages:
   - pkg/k8sutil
   - version
@@ -81,23 +83,23 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/prometheus/client_golang
-  version: d2ead25884778582e740573999f7b07f47e171b4
+  version: 12af604cf208d3105ced825c65231b4ecf00a8cc
   subpackages:
   - prometheus
   - prometheus/internal
   - prometheus/promhttp
 - name: github.com/prometheus/client_model
-  version: f287a105a20ec685d797f65cd0ce8fbeaef42da1
+  version: 56726106282f1985ea77d5305743db7231b0c0a8
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 2998b132700a7d019ff618c06a234b47c1f3f681
+  version: cfeb6f9992ffa54aaa4f2170ade4067ee478b250
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: b1a0a9a36d7453ba0f62578b99712f3a6c5f82d1
+  version: bf6a532e95b1f7a62adf0ab5050a5bb2237ad2f4
   subpackages:
   - internal/util
   - nfs
@@ -109,7 +111,7 @@ imports:
 - name: go.uber.org/multierr
   version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: go.uber.org/zap
-  version: 67bc79d13d155c02fd008f721863ff8cc5f30659
+  version: 82e3b47c1fe49387143b1a051a9ab6f34a08678d
   subpackages:
   - buffer
   - internal/bufferpool
@@ -153,7 +155,7 @@ imports:
   subpackages:
   - rate
 - name: golang.org/x/tools
-  version: 158f3dcaf6fd34726c03eaeec90da41c62dd9697
+  version: 0a99049195aff55f007fc4dfd48e3ec2b4d5f602
 - name: google.golang.org/appengine
   version: 4a4468ece617fc8205e99368fa2200e9d1fad421
   subpackages:
@@ -326,7 +328,7 @@ imports:
 - name: k8s.io/code-generator
   version: 3dcf91f64f638563e5106f21f50c31fa361c918d
 - name: k8s.io/gengo
-  version: fd15ee9cc2f77baa4f31e59e6acbf21146455073
+  version: 0689ccc1d7d65d9dd1bedcc3b0b1ed7df91ba266
 - name: k8s.io/klog
   version: 8139d8cb77af419532b33dfa7dd09fbc5f1d344f
 - name: k8s.io/kube-openapi
