@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -120,7 +121,7 @@ func (c *Configurator) deleteCertificatesForProject(object metav1.Object) error 
 		klog.V(2).Infof("Checking file: %v", f.Name())
 		if strings.HasPrefix(f.Name(), prefix) {
 			klog.Infof("Deleting file: %v", f.Name())
-			removeErr := os.Remove(f.Name())
+			removeErr := os.Remove(filepath.Join(c.ephermalCertBase, f.Name()))
 			if !os.IsNotExist(removeErr) {
 				err = multierr.Append(err, removeErr)
 			}
