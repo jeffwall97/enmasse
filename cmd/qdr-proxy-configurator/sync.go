@@ -9,18 +9,19 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
-	"github.com/enmasseproject/enmasse/pkg/qdr"
-	"github.com/enmasseproject/enmasse/pkg/util"
-	"go.uber.org/multierr"
 	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
 	"os"
 	"path"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
+	"github.com/enmasseproject/enmasse/pkg/qdr"
+	"github.com/enmasseproject/enmasse/pkg/util"
+	"go.uber.org/multierr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 func (c *Configurator) syncResource(currentPointer interface{}, resource interface{}) (bool, error) {
@@ -116,10 +117,13 @@ func (c *Configurator) deleteCertificatesForProject(object metav1.Object) error 
 	klog.Infof("Cleaning up certificates for: %v", object)
 
 	for _, f := range files {
-		klog.V(2).Infof("Checking file: %v", f)
+		klog.V(2).Infof("Checking file: %v", f.Name())
 		if strings.HasPrefix(f.Name(), prefix) {
-			klog.Infof("Deleting file: %v", f)
-			err = multierr.Append(err, os.Remove(f.Name()))
+			klog.Infof("Deleting file: %v", f.Name())
+			removeErr := os.Remove(f.Name())
+			if !os.IsNotExist(removeErr) {
+				err = multierr.Append(err, removeErr)
+			}
 		}
 	}
 
