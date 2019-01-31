@@ -84,7 +84,8 @@ func (r Connector) GetType() string {
 
 type SslProfile struct {
 	NamedResource
-	CertificatePath string `json:"certFile,omitempty"`
+	CertificatePath   string `json:"certFile,omitempty"`
+	CACertificatePath string `json:"caCertFile,omitempty"`
 }
 
 func (r SslProfile) GetType() string {

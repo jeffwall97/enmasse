@@ -212,8 +212,8 @@ func (c *Configurator) syncSslProfile(object metav1.Object, certificate []byte) 
 	// sync with qdr
 
 	return c.syncResource(&qdr.SslProfile{}, &qdr.SslProfile{
-		NamedResource:   namedResource(object, "sslProfile"),
-		CertificatePath: certFile,
+		NamedResource:     namedResource(object, "sslProfile"),
+		CACertificatePath: certFile,
 	})
 }
 
