@@ -6,6 +6,8 @@
 package v1beta1
 
 import (
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,12 +40,30 @@ type AddressSpaceSpec struct {
 }
 
 type AuthenticationService struct {
-	Type    string            `json:"type"`
-	Details map[string]Detail `json:"details,omitempty"`
+	Type    string          `json:"type"`
+	Details json.RawMessage `json:"details,omitempty"`
 }
 
-type Detail interface {
-	DeepCopyDetail() Detail
+type Detail struct {
+	StringValue  *string
+	FloatValue   *float64
+	BooleanValue *bool
+}
+
+func (d *Detail) UnmarshalJSON(b []byte) error {
+	return nil
+}
+
+func (d Detail) MarshalJSON() ([]byte, error) {
+	if d.StringValue != nil {
+		return json.Marshal(d.StringValue)
+	} else if d.FloatValue != nil {
+		return json.Marshal(d.FloatValue)
+	} else if d.BooleanValue != nil {
+		return json.Marshal(d.BooleanValue)
+	} else {
+		return []byte("null"), nil
+	}
 }
 
 type EndpointSpec struct {
