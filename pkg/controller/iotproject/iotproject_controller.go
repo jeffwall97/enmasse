@@ -7,6 +7,7 @@ package iotproject
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 
 	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
@@ -501,10 +502,12 @@ func (r *ReconcileIoTProject) reconcileAddress(project *iotv1alpha1.IoTProject, 
 func (r *ReconcileIoTProject) createOrUpdateAddress(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, addressBaseName string, plan string, typeName string) error {
 
 	addressName := util.AddressName(project, addressBaseName)
-	addressMetaName := util.EncodeAsMetaName(addressName)
+	addressMetaName := util.EncodeAsMetaName(strategy.AddressSpaceName, addressName)
+
+	log.Info("Creating/updating address", "basename", addressBaseName, "name", addressName, "metaname", addressMetaName)
 
 	address := &enmassev1beta1.Address{
-		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + "." + addressMetaName},
+		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: addressMetaName},
 	}
 
 	_, err := controllerutil.CreateOrUpdate(ctx, r.client, address, func(existing runtime.Object) error {
@@ -555,7 +558,8 @@ func (r *ReconcileIoTProject) reconcileAddressSpace(project *iotv1alpha1.IoTProj
 func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, credentials *iotv1alpha1.Credentials, existing *userv1beta1.MessagingUser) error {
 
 	username := credentials.Username
-	password := credentials.Password
+	password := base64.StdEncoding.EncodeToString([]byte(credentials.Password))
+
 	tenant := project.Namespace + "." + project.Name
 
 	existing.Spec = userv1beta1.MessagingUserSpec{

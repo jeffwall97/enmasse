@@ -14,21 +14,11 @@ import (
 )
 
 var (
-	addressNameExpression *regexp.Regexp
-	replaceExpression     *regexp.Regexp
-	operatorUuidNamespace uuid.UUID = uuid.MustParse("1516b246-23aa-11e9-b615-c85b762e5a2c")
+	addressNameExpression  *regexp.Regexp = regexp.MustCompile("^[a-zA-Z]+$")
+	replaceExpression      *regexp.Regexp = regexp.MustCompile("[^a-zA-Z]")
+	replaceStartExpression *regexp.Regexp = regexp.MustCompile("^[^a-zA-Z]+")
+	operatorUuidNamespace  uuid.UUID      = uuid.MustParse("1516b246-23aa-11e9-b615-c85b762e5a2c")
 )
-
-func init() {
-
-	var err error
-	addressNameExpression, err = regexp.Compile("^[a-zA-Z]+$")
-	replaceExpression, err = regexp.Compile("[^a-zA-Z]")
-
-	if err != nil {
-		panic(err)
-	}
-}
 
 // Get an address name from an IoTProject
 func AddressName(object metav1.Object, prefix string) string {
@@ -36,10 +26,10 @@ func AddressName(object metav1.Object, prefix string) string {
 }
 
 // Encode an address name so that it can be put inside the .metadata.name field of an Address object
-func EncodeAsMetaName(addressName string) string {
+func EncodeAsMetaName(addressSpaceName string, addressName string) string {
 
 	if addressNameExpression.MatchString(addressName) {
-		return addressName
+		return addressSpaceName + "." + addressName
 	}
 
 	newPrefix := replaceExpression.ReplaceAllString(addressName, "")
@@ -47,5 +37,16 @@ func EncodeAsMetaName(addressName string) string {
 		newPrefix = newPrefix + "-"
 	}
 
-	return newPrefix + uuid.NewMD5(operatorUuidNamespace, []byte(addressName)).String()
+	name := newPrefix + uuid.NewMD5(operatorUuidNamespace, []byte(addressName)).String()
+
+	rname := []rune(name)
+	l := len(rname)
+	if l > 60 {
+		s := l - 60
+		rname = rname[s:l]
+		name = string(rname)
+		name = replaceStartExpression.ReplaceAllString(name, "")
+	}
+
+	return addressSpaceName + "." + name
 }
