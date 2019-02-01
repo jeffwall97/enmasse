@@ -331,7 +331,7 @@ func extractEndpointInformation(
 
 		log.V(2).Info("Ports to scan", "ports", ports)
 
-		endpoint.Certificate = es.Certificate
+		endpoint.Certificate = addressSpace.Status.CACertificate
 
 		foundPort := false
 		for _, port := range ports {

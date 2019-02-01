@@ -66,6 +66,7 @@ type ExposeSpec struct {
 type AddressSpaceStatus struct {
 	IsReady bool `json:"isReady"`
 
+	CACertificate  []byte           `json:"caCert,omitempty"`
 	EndpointStatus []EndpointStatus `json:"endpointStatuses,omitempty"`
 }
 
