@@ -6,9 +6,10 @@
 package gc
 
 import (
+	"time"
+
 	"github.com/enmasseproject/enmasse/pkg/gc/collectors"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"time"
 )
 
 var log = logf.Log.WithName("gc")
@@ -29,17 +30,6 @@ func NewGarbageCollector() *garbageCollector {
 		stopChan: stopChan,
 	}
 
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				result.Collect()
-			case <-stopChan:
-				return
-			}
-		}
-	}()
-
 	return result
 }
 
@@ -49,6 +39,22 @@ func (g *garbageCollector) Stop() {
 }
 
 func (g *garbageCollector) Run(stopCh <-chan struct{}) {
+
+	go func() {
+
+		// run on startup
+		g.Collect()
+
+		for {
+			select {
+			case <-g.ticker.C:
+				g.Collect()
+			case <-g.stopChan:
+				return
+			}
+		}
+	}()
+
 	<-stopCh
 }
 

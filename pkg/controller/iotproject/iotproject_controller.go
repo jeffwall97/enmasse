@@ -10,6 +10,8 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+
 	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
 	userv1beta1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
@@ -404,6 +406,8 @@ func isTls(
 
 }
 
+// Ensure that controller owner is set
+// As there may only be one, we only to this when the creation timestamp is zero
 func (r *ReconcileIoTProject) ensureControllerOwnerIsSet(owner, object v1.Object) error {
 
 	ts := object.GetCreationTimestamp()
@@ -413,6 +417,43 @@ func (r *ReconcileIoTProject) ensureControllerOwnerIsSet(owner, object v1.Object
 			return err
 		}
 	}
+
+	return nil
+}
+
+func (r *ReconcileIoTProject) ensureOwnerIsSet(owner, object v1.Object) error {
+
+	ro, ok := owner.(runtime.Object)
+	if !ok {
+		return fmt.Errorf("is not a %T a runtime.Object, cannot call ensureOwnerIsSet", owner)
+	}
+
+	gvk, err := apiutil.GVKForObject(ro, r.scheme)
+	if err != nil {
+		return err
+	}
+
+	// create our ref
+	newref := *NewOwnerRef(owner, gvk)
+
+	// get existing refs
+	refs := object.GetOwnerReferences()
+
+	found := false
+	for _, ref := range refs {
+		if isSameRef(ref, newref) {
+			found = true
+		}
+	}
+
+	// did we find it?
+	if !found {
+		// no! so append
+		refs = append(refs, newref)
+	}
+
+	// set the new result
+	object.SetOwnerReferences(refs)
 
 	return nil
 }
@@ -432,8 +473,7 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 	_, err := controllerutil.CreateOrUpdate(ctx, r.client, addressSpace, func(existing runtime.Object) error {
 		existingAddressSpace := existing.(*enmassev1beta1.AddressSpace)
 
-		// FIXME: need to add ourselves in any case
-		if err := r.ensureControllerOwnerIsSet(project, existingAddressSpace); err != nil {
+		if err := r.ensureOwnerIsSet(project, existingAddressSpace); err != nil {
 			return err
 		}
 
@@ -470,10 +510,6 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 	_, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
 		existingUser := existing.(*userv1beta1.MessagingUser)
 
-		if err := r.ensureControllerOwnerIsSet(project, existingUser); err != nil {
-			return err
-		}
-
 		log.Info("Reconcile messaging user", "MessagingUser", existingUser)
 
 		return r.reconcileAdapterMessagingUser(project, &credentials, existingUser)
@@ -491,6 +527,10 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 }
 
 func (r *ReconcileIoTProject) reconcileAddress(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, addressName string, plan string, typeName string, existing *enmassev1beta1.Address) error {
+
+	if err := r.ensureControllerOwnerIsSet(project, existing); err != nil {
+		return err
+	}
 
 	existing.Spec.Address = addressName
 	existing.Spec.Plan = plan
@@ -512,10 +552,6 @@ func (r *ReconcileIoTProject) createOrUpdateAddress(ctx context.Context, project
 
 	_, err := controllerutil.CreateOrUpdate(ctx, r.client, address, func(existing runtime.Object) error {
 		existingAddress := existing.(*enmassev1beta1.Address)
-
-		if err := r.ensureControllerOwnerIsSet(project, existingAddress); err != nil {
-			return err
-		}
 
 		return r.reconcileAddress(project, strategy, addressName, plan, typeName, existingAddress)
 	})
@@ -556,6 +592,10 @@ func (r *ReconcileIoTProject) reconcileAddressSpace(project *iotv1alpha1.IoTProj
 }
 
 func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1.IoTProject, credentials *iotv1alpha1.Credentials, existing *userv1beta1.MessagingUser) error {
+
+	if err := r.ensureControllerOwnerIsSet(project, existing); err != nil {
+		return err
+	}
 
 	username := credentials.Username
 	password := base64.StdEncoding.EncodeToString([]byte(credentials.Password))

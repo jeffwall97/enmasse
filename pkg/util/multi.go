@@ -13,6 +13,16 @@ type MultiTool struct {
 	Error    error
 }
 
+func (m *MultiTool) Ran(err error) {
+	if err != nil {
+		if m.Error != nil {
+			m.Error = multierr.Append(m.Error, err)
+		} else {
+			m.Error = err
+		}
+	}
+}
+
 func (m *MultiTool) Run(operation func() error) {
 	m.RunChange(func() (b bool, e error) {
 		return false, operation()
@@ -27,16 +37,10 @@ func (m *MultiTool) RunChange(operation func() (bool, error)) {
 
 	changed, err := operation()
 
-	if err != nil {
-		if m.Error != nil {
-			m.Error = multierr.Append(m.Error, err)
-		} else {
-			m.Error = err
-		}
-	} else {
-		if changed {
-			m.Changed = true
-		}
+	m.Ran(err)
+
+	if err == nil && changed {
+		m.Changed = true
 	}
 
 }

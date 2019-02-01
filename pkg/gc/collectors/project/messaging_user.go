@@ -6,12 +6,12 @@
 package project
 
 import (
+	"strings"
+
 	"github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
 	userv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/user/v1beta1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/enmasseproject/enmasse/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"strings"
 )
 
 func (p *projectCollector) collectMessagingUsers() error {
@@ -28,103 +28,68 @@ func (p *projectCollector) collectMessagingUsers() error {
 		return err
 	}
 
+	mt := util.MultiTool{}
+
 	for _, user := range list.Items {
-		if err := p.checkMessagingUser(&user); err != nil {
-			return err
-		}
+		mt.Ran(p.checkMessagingUser(&user))
 	}
 
-	return nil
+	return mt.Error
 }
 
 func (p *projectCollector) checkMessagingUser(user *userv1alpha1.MessagingUser) error {
-	log.Info("Checking messaging user", "MessagingUser", user)
+	log.Info("Checking address", "MessagingUser", user)
 
-	if user.ObjectMeta.OwnerReferences != nil {
-		for _, owner := range user.ObjectMeta.OwnerReferences {
+	found, notFound, err := p.findOwningProjects(user, true)
+	if err != nil {
+		return err
+	}
 
-			if owner.Kind != "IoTProject" {
-				continue
-			}
+	if len(found) <= 0 && len(notFound) > 0 {
+		// we were owned, but now everyone is gone
+		return p.deleteUser(user)
+	}
 
-			project, err := p.findOwnerProject(user.Namespace, &owner)
-			if err != nil {
-				log.Error(err, "Failed to locate owning project", "MessagingUser", user)
-				continue
-			}
-
-			if !p.shouldDeleteUserForProject(user, project) {
-				continue
-			}
-
-			// no valid owner anymore
-
-			if err := p.deleteMessagingUser(user, &owner.UID); err != nil {
-				log.Error(err, "Failed to delete MessagingUser", "MessagingUser", user)
-			}
+	for _, proj := range found {
+		if p.needUser(user, &proj) {
+			return nil
 		}
 	}
+
+	return p.deleteUser(user)
 
 	return nil
 }
 
-func (p *projectCollector) shouldDeleteUserForProject(user *userv1alpha1.MessagingUser, project *v1alpha1.IoTProject) bool {
-
-	if project == nil {
-		// owning project is gone
-		return true
-	}
+func (p *projectCollector) needUser(user *userv1alpha1.MessagingUser, project *v1alpha1.IoTProject) bool {
 
 	if project.Spec.DownstreamStrategy.ManagedDownstreamStrategy == nil {
 		// owning project is no longer of typed "managed"
-		return true
+		return false
 	}
 
 	toks := strings.Split(user.Name, ".")
 	if len(toks) != 2 {
 		// invalid user name format ... better delete this
-		return true
+		return false
 	}
 
 	if toks[0] != project.Spec.DownstreamStrategy.ManagedDownstreamStrategy.AddressSpaceName {
 		// address space name doesn't match user name ... as we own it, we delete it
-		return true
+		return false
 	}
 
 	// keep it … for now ;-)
-	return false
+	return true
 
 }
 
-// find the owner project of a resource
-func (p *projectCollector) findOwnerProject(namespace string, owner *metav1.OwnerReference) (*v1alpha1.IoTProject, error) {
-	if owner.Kind != "IoTProject" {
-		return nil, nil
-	}
+func (p *projectCollector) deleteUser(user *userv1alpha1.MessagingUser) error {
+	log.Info("Deleting Messaging User", "MessagingUser", user, "UID", user.UID)
 
-	project, err := p.client.IotV1alpha1().
-		IoTProjects(namespace).
-		Get(owner.Name, metav1.GetOptions{})
-
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	if project.ObjectMeta.UID != owner.UID {
-		return nil, nil
-	}
-
-	return project, nil
-}
-
-func (p *projectCollector) deleteMessagingUser(user *userv1alpha1.MessagingUser, uid *types.UID) error {
-	log.Info("Deleting Messaging User", "MessagingUser", user, "UID", uid)
 	return p.client.UserV1beta1().
 		MessagingUsers(user.Namespace).
 		Delete(user.Name, &metav1.DeleteOptions{
-			Preconditions: &metav1.Preconditions{UID: uid},
+			Preconditions: &metav1.Preconditions{UID: &user.UID},
 		})
 }

@@ -8,6 +8,7 @@ package project
 import (
 	"github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
 	"github.com/enmasseproject/enmasse/pkg/gc/collectors"
+	"github.com/enmasseproject/enmasse/pkg/util"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -31,13 +32,11 @@ func NewProjectCollector(enmasseClient *versioned.Clientset, namespace string) *
 // Collect once
 func (p *projectCollector) CollectOnce() error {
 
-	if err := p.collectAddressSpaces(); err != nil {
-		return err
-	}
+	mt := util.MultiTool{}
 
-	if err := p.collectMessagingUsers(); err != nil {
-		return err
-	}
+	mt.Ran(p.collectAddressSpaces())
+	mt.Ran(p.collectAddresses())
+	mt.Ran(p.collectMessagingUsers())
 
-	return nil
+	return mt.Error
 }
