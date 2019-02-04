@@ -42,7 +42,7 @@ spec:
           value: "iot-operator"
         resources:
           limits:
-            memory: 512Mi
+            memory: 128Mi
         ports:
         volumeMounts:
       volumes:

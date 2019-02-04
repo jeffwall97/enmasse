@@ -130,6 +130,9 @@ spec:
         volumeMounts:
         - mountPath: /var/qdr-certs
           name: qdr-tmp-certs
+        resources:
+          limits:
+            memory: 64Mi
 
 # Proxy Qpid dispatch router
 
@@ -142,6 +145,9 @@ spec:
         - mountPath: /etc/config
           name: qdr-proxy-config
           readOnly: true
+        resources:
+          limits:
+            memory: 128Mi
 
       volumes:
       - name: config
