@@ -49,16 +49,17 @@ func (p *projectCollector) checkAddresss(addr *corev1alpha1.Address) error {
 	}
 
 	for _, proj := range found {
+		// we are still owned, but now check if we are still needed
 		if p.needAddress(addr, &proj) {
 			return nil
 		}
 	}
 
 	return p.deleteAddress(addr)
-
-	return nil
 }
 
+// check if the project still needs this address, as the project owns this address, it may assume that
+// no one else is interested in this address
 func (p *projectCollector) needAddress(addr *corev1alpha1.Address, proj *v1alpha1.IoTProject) bool {
 	if proj.Spec.DownstreamStrategy.ManagedDownstreamStrategy == nil {
 		return false

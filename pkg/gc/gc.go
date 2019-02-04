@@ -67,6 +67,7 @@ func (g *garbageCollector) Collect() {
 	for _, collector := range g.collectors {
 		if err := collector.CollectOnce(); err != nil {
 			log.Error(err, "Failed to process collector", "collector", collector)
+			// continue with other collectors
 		}
 	}
 }

@@ -51,16 +51,17 @@ func (p *projectCollector) checkMessagingUser(user *userv1alpha1.MessagingUser) 
 	}
 
 	for _, proj := range found {
+		// we are still owned, but now check if we are still needed
 		if p.needUser(user, &proj) {
 			return nil
 		}
 	}
 
 	return p.deleteUser(user)
-
-	return nil
 }
 
+// check if the project still needs this user, as the project owns the user, this function may assume
+// that no one else is interested in this user
 func (p *projectCollector) needUser(user *userv1alpha1.MessagingUser, project *v1alpha1.IoTProject) bool {
 
 	if project.Spec.DownstreamStrategy.ManagedDownstreamStrategy == nil {
