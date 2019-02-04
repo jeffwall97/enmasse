@@ -9,11 +9,12 @@ import (
 	"fmt"
 	"strings"
 
-	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 func splitUserName(name string) (string, string, error) {
@@ -26,22 +27,55 @@ func splitUserName(name string) (string, string, error) {
 	return tokens[0], tokens[1], nil
 }
 
-// Convert projects to reconcile requests
-func convertToRequests(projects []iotv1alpha1.IoTProject, err error) []reconcile.Request {
+// Ensure that controller owner is set
+// As there may only be one, we only to this when the creation timestamp is zero
+func (r *ReconcileIoTProject) ensureControllerOwnerIsSet(owner, object v1.Object) error {
+
+	if isNewObject(object) {
+		err := controllerutil.SetControllerReference(owner, object, r.scheme)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *ReconcileIoTProject) ensureOwnerIsSet(owner, object v1.Object) error {
+
+	ro, ok := owner.(runtime.Object)
+	if !ok {
+		return fmt.Errorf("is not a %T a runtime.Object, cannot call ensureOwnerIsSet", owner)
+	}
+
+	gvk, err := apiutil.GVKForObject(ro, r.scheme)
 	if err != nil {
-		return []reconcile.Request{}
+		return err
 	}
 
-	var result []reconcile.Request
+	// create our ref
+	newref := *NewOwnerRef(owner, gvk)
 
-	for _, project := range projects {
-		result = append(result, reconcile.Request{NamespacedName: types.NamespacedName{
-			Namespace: project.Namespace,
-			Name:      project.Name,
-		}})
+	// get existing refs
+	refs := object.GetOwnerReferences()
+
+	found := false
+	for _, ref := range refs {
+		if isSameRef(ref, newref) {
+			found = true
+		}
 	}
 
-	return result
+	// did we find it?
+	if !found {
+		// no! so append
+		refs = append(refs, newref)
+	}
+
+	// set the new result
+	object.SetOwnerReferences(refs)
+
+	return nil
 }
 
 func NewOwnerRef(owner v1.Object, gvk schema.GroupVersionKind) *v1.OwnerReference {
@@ -55,6 +89,11 @@ func NewOwnerRef(owner v1.Object, gvk schema.GroupVersionKind) *v1.OwnerReferenc
 		BlockOwnerDeletion: &blockOwnerDeletion,
 		Controller:         &isController,
 	}
+}
+
+func isNewObject(object v1.Object) bool {
+	ts := object.GetCreationTimestamp()
+	return ts.IsZero()
 }
 
 func isSameRef(ref1, ref2 v1.OwnerReference) bool {
