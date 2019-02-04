@@ -167,9 +167,9 @@ func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1
 		password = []byte(credentials.Password)
 	}
 
-	telemetryName := util.AddressName(existing, "telemetry")
-	eventName := util.AddressName(existing, "event")
-	commandName := util.AddressName(existing, "command")
+	telemetryName := util.AddressName(project, "telemetry")
+	eventName := util.AddressName(project, "event")
+	commandName := util.AddressName(project, "command")
 
 	existing.Spec = userv1beta1.MessagingUserSpec{
 
