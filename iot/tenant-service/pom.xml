@@ -8,7 +8,7 @@
   <parent>
     <groupId>io.enmasse</groupId>
     <artifactId>iot</artifactId>
-    <version>0.26-SNAPSHOT</version>
+    <version>0.27-SNAPSHOT</version>
   </parent>
 
   <artifactId>tenant-service</artifactId>
