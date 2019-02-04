@@ -3,19 +3,23 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
-package util
+package test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/enmasseproject/enmasse/pkg/util"
+)
 
 func TestMulti1(t *testing.T) {
 
-	m := MultiTool{}
+	m := util.MultiTool{}
 
 	counter := 0
 
-	m.Run(func() ( e error) {
+	m.Run(func() (e error) {
 		counter++
-		return  nil
+		return nil
 	})
 	m.RunChange(func() (b bool, e error) {
 		counter++

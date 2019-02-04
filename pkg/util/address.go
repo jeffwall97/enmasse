@@ -21,32 +21,41 @@ var (
 )
 
 // Get an address name from an IoTProject
+// the name is the prefix (e.g. "telemetry") plus the tenant name. The name is not encoded in any way.
 func AddressName(object metav1.Object, prefix string) string {
-	return prefix + "/" + object.GetNamespace() + "." + object.GetName()
+	return prefix + "/" + TenantNameForObject(object)
 }
 
-// Encode an address name so that it can be put inside the .metadata.name field of an Address object
-func EncodeAsMetaName(addressSpaceName string, addressName string) string {
+func EncodeAsMetaName(name string, maxLength int) string {
 
-	if addressNameExpression.MatchString(addressName) {
-		return addressSpaceName + "." + addressName
+	if addressNameExpression.MatchString(name) {
+		return name
 	}
 
-	newPrefix := replaceExpression.ReplaceAllString(addressName, "")
+	newPrefix := replaceExpression.ReplaceAllString(name, "")
 	if len(newPrefix) > 0 {
 		newPrefix = newPrefix + "-"
 	}
 
-	name := newPrefix + uuid.NewMD5(operatorUuidNamespace, []byte(addressName)).String()
+	name = newPrefix + uuid.NewMD5(operatorUuidNamespace, []byte(name)).String()
 
-	rname := []rune(name)
-	l := len(rname)
-	if l > 60 {
-		s := l - 60
-		rname = rname[s:l]
-		name = string(rname)
-		name = replaceStartExpression.ReplaceAllString(name, "")
+	if maxLength > 0 {
+		rname := []rune(name)
+		l := len(rname)
+		if l > maxLength {
+			s := l - maxLength
+			rname = rname[s:l]
+			name = string(rname)
+			name = replaceStartExpression.ReplaceAllString(name, "")
+		}
 	}
 
-	return addressSpaceName + "." + name
+	return name
+}
+
+// Encode an address name so that it can be put inside the .metadata.name field of an Address object
+func EncodeAddressSpaceAsMetaName(addressSpaceName string, addressName string) string {
+
+	return addressSpaceName + "." + EncodeAsMetaName(addressName, 60)
+
 }

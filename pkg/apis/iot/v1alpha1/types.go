@@ -6,6 +6,7 @@
 package v1alpha1
 
 import (
+	"github.com/enmasseproject/enmasse/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -18,6 +19,12 @@ type IoTProject struct {
 
 	Spec   IoTProjectSpec   `json:"spec"`
 	Status IoTProjectStatus `json:"status"`
+}
+
+// Get the IoT tenant name from an IoT project.
+// This is not in any way encoded
+func (project *IoTProject) TenantName() string {
+	return util.TenantName(project.Namespace, project.Name)
 }
 
 type IoTProjectSpec struct {

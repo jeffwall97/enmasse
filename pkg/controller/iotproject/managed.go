@@ -7,7 +7,6 @@ package iotproject
 
 import (
 	"context"
-	"encoding/base64"
 
 	enmassev1beta1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
 	iotv1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
@@ -103,7 +102,7 @@ func (r *ReconcileIoTProject) reconcileAddress(project *iotv1alpha1.IoTProject, 
 func (r *ReconcileIoTProject) createOrUpdateAddress(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, addressBaseName string, plan string, typeName string) error {
 
 	addressName := util.AddressName(project, addressBaseName)
-	addressMetaName := util.EncodeAsMetaName(strategy.AddressSpaceName, addressName)
+	addressMetaName := util.EncodeAddressSpaceAsMetaName(strategy.AddressSpaceName, addressName)
 
 	log.Info("Creating/updating address", "basename", addressBaseName, "name", addressName, "metaname", addressMetaName)
 
@@ -159,9 +158,18 @@ func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1
 	}
 
 	username := credentials.Username
-	password := base64.StdEncoding.EncodeToString([]byte(credentials.Password))
 
-	tenant := project.Namespace + "." + project.Name
+	// only set password when we are creating the object initially
+	// as we cannot detect a change
+
+	var password []byte
+	if isNewObject(existing) {
+		password = []byte(credentials.Password)
+	}
+
+	telemetryName := util.AddressName(existing, "telemetry")
+	eventName := util.AddressName(existing, "event")
+	commandName := util.AddressName(existing, "command")
 
 	existing.Spec = userv1beta1.MessagingUserSpec{
 
@@ -175,9 +183,9 @@ func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1
 		Authorization: []userv1beta1.AuthorizationSpec{
 			{
 				Addresses: []string{
-					"telemetry/" + tenant + "/#",
-					"event/" + tenant + "/#",
-					"command/" + tenant + "/#",
+					telemetryName + "/#",
+					eventName + "/#",
+					commandName + "/#",
 				},
 				Operations: []string{
 					"send",

@@ -27,7 +27,7 @@ type MessagingUserSpec struct {
 
 type AuthenticationSpec struct {
 	Type     string `json:"type"`
-	Password string `json:"password,omitempty"`
+	Password []byte `json:"password,omitempty"`
 	Provider string `json:"provider,omitempty"`
 }
 

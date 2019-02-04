@@ -3,10 +3,12 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
-package util
+package test
 
 import (
 	"testing"
+
+	"github.com/enmasseproject/enmasse/pkg/util"
 
 	"github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +26,7 @@ func TestBuildName1(t *testing.T) {
 	}
 
 	for _, entry := range data {
-		actual := AddressName(&v1alpha1.IoTProject{ObjectMeta: v1.ObjectMeta{
+		actual := util.AddressName(&v1alpha1.IoTProject{ObjectMeta: v1.ObjectMeta{
 			Namespace: entry.namespace,
 			Name:      entry.name,
 		}}, entry.prefix)
@@ -51,7 +53,7 @@ func TestEncodeName(t *testing.T) {
 	}
 
 	for _, entry := range data {
-		actual := EncodeAsMetaName(entry.addressSpace, entry.name)
+		actual := util.EncodeAddressSpaceAsMetaName(entry.addressSpace, entry.name)
 
 		if actual != entry.output {
 			t.Errorf("Encoding was not correct - wanted: %s, got: %s", entry.output, actual)
