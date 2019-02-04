@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, EnMasse authors.
+ * Copyright 2018-2019, EnMasse authors.
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
@@ -7,12 +7,15 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
+	"runtime"
+
 	enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
 	"github.com/enmasseproject/enmasse/pkg/gc"
 	"github.com/enmasseproject/enmasse/pkg/gc/collectors/project"
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"k8s.io/klog"
-	"os"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
@@ -20,11 +23,18 @@ import (
 
 var log = logf.Log.WithName("cmd")
 
+func printVersion() {
+	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
+}
+
 func main() {
 
 	flag.Parse()
 
 	logf.SetLogger(logf.ZapLogger(true /* FIXME: switch to production, or make configurable */))
+
+	printVersion()
 
 	namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
 

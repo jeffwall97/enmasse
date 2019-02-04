@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, EnMasse authors.
+ * Copyright 2018-2019, EnMasse authors.
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
@@ -7,11 +7,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
+	"runtime"
+
 	enmasse "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
-	"os"
 
 	"time"
 
@@ -23,6 +26,11 @@ import (
 var (
 	ephermalCertBase string
 )
+
+func printVersion() {
+	klog.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	klog.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
+}
 
 func initLog() {
 
@@ -55,7 +63,12 @@ func initLog() {
 func main() {
 
 	// init log system
+
 	initLog()
+
+	printVersion()
+
+	// start processing
 
 	stopCh := signals.SetupSignalHandler()
 
@@ -64,10 +77,10 @@ func main() {
 	if ephermalCertBase != "" {
 		fi, err := os.Stat(ephermalCertBase)
 		if err != nil {
-			klog.Fatalf("Emphermal certificate base is configured, but unable to access: %v", err.Error())
+			klog.Fatalf("Ephermal certificate base is configured, but unable to access: %v", err.Error())
 		}
 		if !fi.IsDir() {
-			klog.Fatalln("Emphermal certificate base is configured, but is not a directory")
+			klog.Fatalln("Ephermal certificate base is configured, but is not a directory")
 		}
 	}
 

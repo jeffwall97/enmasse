@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, EnMasse authors.
+ * Copyright 2018-2019, EnMasse authors.
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
@@ -12,7 +12,6 @@ import (
 	"runtime"
 
 	enmassescheme "github.com/enmasseproject/enmasse/pkg/client/clientset/versioned/scheme"
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"k8s.io/client-go/kubernetes/scheme"
 
 	"github.com/enmasseproject/enmasse/pkg/controller"
@@ -47,16 +46,13 @@ func main() {
 	   }
 	*/
 
-	// TODO: replace when enmasse#1280 is fixed
-	namespace, _ := os.LookupEnv(k8sutil.WatchNamespaceEnvVar)
-
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Error(err, "Failed to get configuration")
 		os.Exit(1)
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{Namespace: namespace})
+	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)
