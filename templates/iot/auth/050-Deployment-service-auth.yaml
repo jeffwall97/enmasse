@@ -3,7 +3,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   labels:
-    app: enmasse
+    app: iot-core
     component: hono-service-auth
     enmasse-component: iot
   name: hono-service-auth
@@ -11,12 +11,12 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: enmasse
+      app: iot-core
       component: hono-service-auth
   template:
     metadata:
       labels:
-        app: enmasse
+        app: iot-core
         component: hono-service-auth
     spec:
       containers:

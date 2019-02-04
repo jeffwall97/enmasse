@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: hono-service-auth
   labels:
-    app: enmasse
+    app: iot-core
     component: hono-service-auth
     enmasse-component: iot
   annotations:
@@ -16,5 +16,5 @@ spec:
     protocol: TCP
     targetPort: 5671
   selector:
-    app: enmasse
+    app: iot-core
     component: hono-service-auth
