@@ -13,10 +13,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (p *projectCollector) findOwningProjects(obj metav1.Object, controller bool) ([]v1alpha1.IoTProject, []metav1.OwnerReference, error) {
+// Takes the owner references of `obj` of type `IoTProject` and tries to resolved those into `IoTProject` instances.
+// returns `error` in case anything goes wrong
+// returns `found`, an array of resolved projects
+// returns `notFound` an array of unresolved references of kind `IoTProject`
+func (p *projectCollector) findOwningProjects(obj metav1.Object, controller bool) (found []v1alpha1.IoTProject, notFound []metav1.OwnerReference, err error) {
 
-	found := make([]v1alpha1.IoTProject, 0)
-	notFound := make([]metav1.OwnerReference, 0)
+	found = make([]v1alpha1.IoTProject, 0)
+	notFound = make([]metav1.OwnerReference, 0)
 
 	for _, ref := range obj.GetOwnerReferences() {
 		if ref.Kind != "IoTProject" {
@@ -37,8 +41,7 @@ func (p *projectCollector) findOwningProjects(obj metav1.Object, controller bool
 		}
 	}
 
-	return found, notFound, nil
-
+	return
 }
 
 // find the owner project of a resource
