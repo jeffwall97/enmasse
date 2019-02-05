@@ -45,6 +45,11 @@ func (p *projectCollector) checkMessagingUser(user *userv1alpha1.MessagingUser) 
 		return err
 	}
 
+	if len(found) == 0 && len(notFound) == 0 {
+		// no owner references
+		return nil
+	}
+
 	if len(found) <= 0 && len(notFound) > 0 {
 		// we were owned, but now everyone is gone
 		return p.deleteUser(user)

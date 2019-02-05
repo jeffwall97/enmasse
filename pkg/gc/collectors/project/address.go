@@ -43,6 +43,11 @@ func (p *projectCollector) checkAddresss(addr *corev1alpha1.Address) error {
 		return err
 	}
 
+	if len(found) == 0 && len(notFound) == 0 {
+		// no owner references
+		return nil
+	}
+
 	if len(found) <= 0 && len(notFound) > 0 {
 		// we were owned, but now everyone is gone
 		return p.deleteAddress(addr)

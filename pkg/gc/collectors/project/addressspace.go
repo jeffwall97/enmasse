@@ -43,6 +43,11 @@ func (p *projectCollector) checkAddressSpace(as *corev1alpha1.AddressSpace) erro
 		return err
 	}
 
+	if len(found) == 0 && len(notFound) == 0 {
+		// no owner references
+		return nil
+	}
+
 	if len(found) <= 0 && len(notFound) > 0 {
 		// we were owned, but now everyone is gone
 		// this could be more than one, as we are not looking for controllers
