@@ -57,6 +57,20 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 
 	// create a new user for protocol adapters
 
+	credentials, err := r.reconcileAdapterUser(ctx, project, strategy)
+	if err != nil {
+		log.Error(err, "failed to create adapter user")
+		return nil, err
+	}
+
+	// extract endpoint information
+
+	forceTls := true
+	return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", &credentials, addressSpace, &forceTls)
+}
+
+func (r *ReconcileIoTProject) reconcileAdapterUser(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy) (iotv1alpha1.Credentials, error) {
+
 	adapterUserName := "adapter"
 	adapterUser := &userv1beta1.MessagingUser{
 		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + "." + adapterUserName},
@@ -67,7 +81,7 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 		Password: "bar", // FIXME: generate better password
 	}
 
-	_, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
+	_, err := controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
 		existingUser := existing.(*userv1beta1.MessagingUser)
 
 		log.Info("Reconcile messaging user", "MessagingUser", existingUser)
@@ -75,15 +89,7 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 		return r.reconcileAdapterMessagingUser(project, &credentials, existingUser)
 	})
 
-	if err != nil {
-		log.Error(err, "failed to create adapter user")
-		return nil, err
-	}
-
-	// extract endpoint information
-
-	forceTls := true
-	return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", &credentials, addressSpace, &forceTls)
+	return credentials, err
 }
 
 func (r *ReconcileIoTProject) reconcileAddress(project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy, addressName string, plan string, typeName string, existing *enmassev1beta1.Address) error {
@@ -183,8 +189,11 @@ func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1
 		Authorization: []userv1beta1.AuthorizationSpec{
 			{
 				Addresses: []string{
+					telemetryName,
 					telemetryName + "/#",
+					eventName,
 					eventName + "/#",
+					commandName,
 					commandName + "/#",
 				},
 				Operations: []string{
