@@ -190,11 +190,11 @@ func (r *ReconcileIoTProject) reconcileAdapterMessagingUser(project *iotv1alpha1
 			{
 				Addresses: []string{
 					telemetryName,
-					telemetryName + "/#",
+					telemetryName + "/*",
 					eventName,
-					eventName + "/#",
+					eventName + "/*",
 					commandName,
-					commandName + "/#",
+					commandName + "/*",
 				},
 				Operations: []string{
 					"send",

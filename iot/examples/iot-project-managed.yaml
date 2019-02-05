@@ -18,7 +18,7 @@ spec:
     type: password
     password: Zm9vYmFy # <- foobar
   authorization:
-  - addresses:  [ "telemetry/my-iot-1.managed", "telemetry/my-iot-1.managed/#", "event/my-iot-1.managed", "event/my-iot-1.managed/#" ]
+  - addresses:  [ "telemetry/my-iot-1.managed", "telemetry/my-iot-1.managed/*", "event/my-iot-1.managed", "event/my-iot-1.managed/*" ]
     operations: [ "recv" ]
-  - addresses:  [ "command/my-iot-1.managed", "command/my-iot-1.managed/#" ]
+  - addresses:  [ "command/my-iot-1.managed", "command/my-iot-1.managed/*" ]
     operations: [ "send", "recv" ]
