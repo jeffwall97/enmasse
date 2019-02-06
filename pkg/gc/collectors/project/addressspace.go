@@ -6,6 +6,8 @@
 package project
 
 import (
+	"fmt"
+
 	corev1alpha1 "github.com/enmasseproject/enmasse/pkg/apis/enmasse/v1beta1"
 	"github.com/enmasseproject/enmasse/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,8 +45,10 @@ func (p *projectCollector) checkAddressSpace(as *corev1alpha1.AddressSpace) erro
 		return err
 	}
 
+	log.Info(fmt.Sprintf("IoTProject references - found: %v, notFound: %v, err: %v", len(found), len(notFound), err))
+
 	if len(found) == 0 && len(notFound) == 0 {
-		// no owner references
+		// no IoTProject owner references, we don't touch it
 		return nil
 	}
 

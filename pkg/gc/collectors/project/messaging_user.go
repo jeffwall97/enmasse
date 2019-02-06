@@ -6,6 +6,7 @@
 package project
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/enmasseproject/enmasse/pkg/apis/iot/v1alpha1"
@@ -45,8 +46,10 @@ func (p *projectCollector) checkMessagingUser(user *userv1alpha1.MessagingUser) 
 		return err
 	}
 
+	log.Info(fmt.Sprintf("IoTProject references - found: %v, notFound: %v, err: %v", len(found), len(notFound), err))
+
 	if len(found) == 0 && len(notFound) == 0 {
-		// no owner references
+		// no IoTProject owner references, we don't touch it
 		return nil
 	}
 
