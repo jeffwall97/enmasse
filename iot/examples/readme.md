@@ -41,5 +41,5 @@ mvn spring-boot:run -Drun.arguments=--hono.client.host=$(oc get addressspace man
 
 * Send the telemetry message
 ```
-curl --insecure -X POST -i -u sensor1@managed:hono-secret -H 'Content-Type: application/json' --data-binary '{"temp": 5}' https://$(oc get route iot-http-adapter --template='{{.spec.host}}')/telemetry
+curl --insecure -X POST -i -u sensor1@enmasse-infra.managed:hono-secret -H 'Content-Type: application/json' --data-binary '{"temp": 5}' https://$(oc get route iot-http-adapter --template='{{.spec.host}}')/telemetry
 ```
