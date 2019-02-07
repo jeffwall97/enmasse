@@ -31,13 +31,13 @@ func (p *projectCollector) collectAddresses() error {
 	mt := util.MultiTool{}
 
 	for _, addr := range list.Items {
-		mt.Ran(p.checkAddresss(&addr))
+		mt.Ran(p.checkAddress(&addr))
 	}
 
 	return mt.Error
 }
 
-func (p *projectCollector) checkAddresss(addr *corev1alpha1.Address) error {
+func (p *projectCollector) checkAddress(addr *corev1alpha1.Address) error {
 	log.Info("Checking address", "Address", addr)
 
 	found, notFound, err := p.findOwningProjects(addr, true)
