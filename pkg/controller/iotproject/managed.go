@@ -66,27 +66,32 @@ func (r *ReconcileIoTProject) reconcileManaged(ctx context.Context, request *rec
 	// extract endpoint information
 
 	forceTls := true
-	return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", &credentials, addressSpace, &forceTls)
+	return extractEndpointInformation("messaging", iotv1alpha1.Service, "amqps", credentials, addressSpace, &forceTls)
 }
 
-func (r *ReconcileIoTProject) reconcileAdapterUser(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy) (iotv1alpha1.Credentials, error) {
+func (r *ReconcileIoTProject) reconcileAdapterUser(ctx context.Context, project *iotv1alpha1.IoTProject, strategy *iotv1alpha1.ManagedDownstreamStrategy) (*iotv1alpha1.Credentials, error) {
 
 	adapterUserName := "adapter"
 	adapterUser := &userv1beta1.MessagingUser{
 		ObjectMeta: v1.ObjectMeta{Namespace: project.Namespace, Name: strategy.AddressSpaceName + "." + adapterUserName},
 	}
 
-	credentials := iotv1alpha1.Credentials{
-		Username: adapterUserName,
-		Password: "bar", // FIXME: generate better password
+	pwd, err := util.GeneratePassword(32)
+	if err != nil {
+		return nil, err
 	}
 
-	_, err := controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
+	credentials := &iotv1alpha1.Credentials{
+		Username: adapterUserName,
+		Password: pwd,
+	}
+
+	_, err = controllerutil.CreateOrUpdate(ctx, r.client, adapterUser, func(existing runtime.Object) error {
 		existingUser := existing.(*userv1beta1.MessagingUser)
 
 		log.Info("Reconcile messaging user", "MessagingUser", existingUser)
 
-		return r.reconcileAdapterMessagingUser(project, &credentials, existingUser)
+		return r.reconcileAdapterMessagingUser(project, credentials, existingUser)
 	})
 
 	return credentials, err
