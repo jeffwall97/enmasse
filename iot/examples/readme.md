@@ -54,10 +54,10 @@
 
 * Send telemetry message using MQTT
 
-This is an example using NodePort, so you need to know your cluster IP and use in the command
+  This is an example using NodePort, so you need to know your cluster IP and use in the command
 
   ```
   mosquitto_pub -h ${cluster.ip} -p 31883 -u 'sensor1@enmasse-infra.managed' -P hono-secret -t telemetry -m '{"temp": 5}'
   ```
 
-In the future, we'll provide a proper examples based on the Openshift route with TLS and remove NodePort.
+  In the future, we'll provide a proper examples based on the Openshift route with TLS and remove NodePort.
