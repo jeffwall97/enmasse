@@ -11,6 +11,7 @@ IOT_MODULES=\
 	iot/core \
 	iot/device-registry \
 	iot/http-adapter \
+	iot/mqtt-adapter \
 	iot/iot-gc-s2i \
 	iot/iot-operator-s2i \
 	iot/qdr-configurator-s2i \
