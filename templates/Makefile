@@ -6,7 +6,7 @@ BUILDDIR=build
 INSTALLNAME=enmasse-$(TAG)
 INSTALLDIR=$(BUILDDIR)/$(INSTALLNAME)
 PACKAGE_INSTALL_DIR=$(INSTALLDIR)/install
-MODULES=crds address-space-controller example-roles example-plans api-server api-service grafana none-authservice prometheus service-broker cluster-service-broker standard-authservice alertmanager kube-state-metrics
+MODULES=crds address-space-controller example-roles example-plans api-server api-service grafana none-authservice prometheus service-broker cluster-service-broker standard-authservice alertmanager kube-state-metrics kafka
 
 prepare:
 	mkdir -p $(PACKAGE_INSTALL_DIR)
@@ -54,7 +54,17 @@ $(MONITORING_BUNDLE): replace_images
 		mv $$i.tmp $$i; \
 	done
 
-install: ansible_install component_install $(ENMASSE_BUNDLE) $(MONITORING_BUNDLE) 
+KAFKA_BUNDLE=$(PACKAGE_INSTALL_DIR)/bundles/kafka
+$(KAFKA_BUNDLE): replace_images
+	mkdir -p $(KAFKA_BUNDLE)
+	for i in kafka; do \
+		cp $(BUILDDIR)/replaced/$$i/*.yaml $(KAFKA_BUNDLE)/; \
+	done
+	for i in `find $(KAFKA_BUNDLE) -name "*.yaml"`; do \
+		sed -e 's/myproject/$(DEFAULT_PROJECT)/g' -i $$i; \
+	done
+
+install: ansible_install component_install $(ENMASSE_BUNDLE) $(MONITORING_BUNDLE) $(KAFKA_BUNDLE)
 	cp -r $(PACKAGE_DOCS_DIR) $(INSTALLDIR)/docs
 
 package: prepare install
@@ -62,4 +72,4 @@ package: prepare install
 
 coverage:
 
-.PHONY: prepare package clean $(ENMASSE_BUNDLE) $(MONITORING_BUNDLE)
+.PHONY: prepare package clean $(ENMASSE_BUNDLE) $(MONITORING_BUNDLE) $(KAFKA_BUNDLE)
