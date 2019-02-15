@@ -85,7 +85,10 @@ public class KubeSchemaApi implements SchemaApi {
                 .map(ResourceAllowance::getName)
                 .collect(Collectors.toSet());
 
-        List<String> required = "brokered".equals(addressSpacePlan.getAddressSpaceType()) ? Arrays.asList("broker") : Arrays.asList("broker", "router", "aggregate");
+
+        List<String> required = "brokered".equals(addressSpacePlan.getAddressSpaceType()) ? Arrays.asList("broker") :
+                "standard".equals(addressSpacePlan.getAddressSpaceType()) ? Arrays.asList("broker", "router", "aggregate") :
+                        Collections.singletonList("kafka");
         if (!resources.containsAll(required)) {
             Set<String> missing = new HashSet<>(required);
             missing.removeAll(resources);
@@ -105,6 +108,8 @@ public class KubeSchemaApi implements SchemaApi {
             if (!Arrays.asList("anycast", "multicast").contains(addressPlan.getAddressType())) {
                 requiredResources.add("broker");
             }
+        } else if ("kafka".equals(addressSpaceType)) {
+            requiredResources.add("kafka");
         }
         Set<String> resourcesUsed = addressPlan.getRequiredResources().stream().map(ResourceRequest::getName).collect(Collectors.toSet());
 
