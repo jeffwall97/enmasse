@@ -7,6 +7,8 @@ package io.enmasse.admin.model.v1;
 import io.enmasse.common.model.CustomResources;
 import io.fabric8.kubernetes.api.model.apiextensions.CustomResourceDefinition;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
+import io.strimzi.api.kafka.KafkaAssemblyList;
+import io.strimzi.api.kafka.model.Kafka;
 
 public class AdminCrd {
 
@@ -42,6 +44,11 @@ public class AdminCrd {
         KubernetesDeserializer.registerCustomKind(API_VERSION, StandardInfraConfig.KIND, StandardInfraConfig.class);
         KubernetesDeserializer.registerCustomKind(API_VERSION, StandardInfraConfigList.KIND, StandardInfraConfigList.class);
 
+        KubernetesDeserializer.registerCustomKind(API_VERSION, KafkaInfraConfig.KIND, KafkaInfraConfig.class);
+        KubernetesDeserializer.registerCustomKind(API_VERSION, KafkaInfraConfigList.KIND, KafkaInfraConfigList.class);
+
+        KubernetesDeserializer.registerCustomKind(Kafka.CRD_API_VERSION, Kafka.RESOURCE_KIND, Kafka.class);
+        KubernetesDeserializer.registerCustomKind(Kafka.CRD_API_VERSION, Kafka.RESOURCE_LIST_KIND, KafkaAssemblyList.class);
     }
 
     public static CustomResourceDefinition addressPlans() {
