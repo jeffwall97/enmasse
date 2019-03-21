@@ -8,20 +8,23 @@ package io.enmasse.systemtest.common.upgrade;
 import io.enmasse.address.model.Address;
 import io.enmasse.address.model.AddressSpace;
 import io.enmasse.address.model.AuthenticationServiceType;
-import io.enmasse.systemtest.AddressSpaceType;
-import io.enmasse.systemtest.AddressType;
-import io.enmasse.systemtest.CustomLogger;
-import io.enmasse.systemtest.UserCredentials;
+import io.enmasse.systemtest.*;
 import io.enmasse.systemtest.bases.TestBase;
+import io.enmasse.systemtest.cmdclients.CmdClient;
+import io.enmasse.systemtest.cmdclients.KubeCMDClient;
 import io.enmasse.systemtest.utils.AddressSpaceUtils;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.enmasse.systemtest.TestTag.upgrade;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag(upgrade)
 class UpgradeTest extends TestBase {
@@ -30,6 +33,33 @@ class UpgradeTest extends TestBase {
 
     @Test
     void testFunctionalityBeforeAndAfterUpgrade() throws Exception {
+        runUpgradeTest(false);
+        applyEnmasseVersion(Paths.get(Environment.getInstance().getUpgradeTemplates()), false);
+        runUpgradeTest(true);
+        applyEnmasseVersion(Paths.get(Environment.getInstance().getDowngradeTemplates()), true);
+        runUpgradeTest(true);
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Help methods
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void applyEnmasseVersion(Path templatePaths, boolean downgrade) throws InterruptedException {
+        Path inventoryFile = Paths.get(System.getProperty("user.dir"), "ansible", "inventory", "systemtests.inventory");
+        Path ansiblePlaybook = Paths.get(templatePaths.toString(), "ansible", "playbooks", "openshift", "deploy_all.yml");
+        List<String> cmd = Arrays.asList("ansible-playbook", "-i", inventoryFile.toString(), ansiblePlaybook.toString());
+
+        if (downgrade) {
+            KubeCMDClient.deletePodByLabel("name", "enmasse-operator");
+        }
+
+        assertTrue(CmdClient.execute(cmd, 300_000, true).getRetCode(), "Deployment of new version of enmasse failed");
+        log.info("Sleep after {}", downgrade ? "downgrade" : "upgrade");
+        Thread.sleep(700_000);
+    }
+
+    private void runUpgradeTest(boolean upgraded) throws Exception {
         AddressSpace brokered = AddressSpaceUtils.createAddressSpaceObject("brokered-addr-space", AddressSpaceType.BROKERED, AuthenticationServiceType.STANDARD);
         AddressSpace standard = AddressSpaceUtils.createAddressSpaceObject("standard-addr-space", AddressSpaceType.STANDARD, AuthenticationServiceType.STANDARD);
         List<Address> standardAddresses = getAllStandardAddresses();
@@ -41,7 +71,7 @@ class UpgradeTest extends TestBase {
         UserCredentials cred = new UserCredentials("kornelius", "korny");
         int msgCount = 13;
 
-        if (!environment.isUpgraded()) {
+        if (!upgraded) {
             log.info("Before upgrade phase");
             createAddressSpaceList(brokered, standard);
 

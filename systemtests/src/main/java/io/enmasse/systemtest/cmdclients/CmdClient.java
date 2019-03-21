@@ -17,7 +17,7 @@ public abstract class CmdClient {
     protected static final Object lock = new Object();
     protected static final Environment env = Environment.getInstance();
 
-    protected static ExecutionResultData execute(List<String> command, int timeout, boolean logToOutput) {
+    public static ExecutionResultData execute(List<String> command, int timeout, boolean logToOutput) {
         try {
             Executor executor = new Executor();
             int ret = executor.execute(command, timeout);
