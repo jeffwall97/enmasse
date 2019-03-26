@@ -24,7 +24,7 @@ public class IoTUtils {
         TimeoutBudget budget = new TimeoutBudget(5, TimeUnit.MINUTES);
         while (budget.timeLeft() >= 0 && !isReady) {
             config = apiClient.getIoTConfig(config.getMetadata().getName());
-            isReady = config.getStatus().isInitialized();
+            isReady = config.getStatus()!=null && config.getStatus().isInitialized();
             if (!isReady) {
                 Thread.sleep(10000);
             }
@@ -48,7 +48,7 @@ public class IoTUtils {
             log.info("Waiting until IoTProject: '{}' will be in ready state", project.getMetadata().getName());
         }
         if (!isReady) {
-            String jsonStatus = project != null ? project.getStatus().toString() : "";
+            String jsonStatus = project != null && project.getStatus() != null ? project.getStatus().toString() : "Project doesn't have status";
             throw new IllegalStateException("IoTProject " + project.getMetadata().getName() + " is not in Ready state within timeout: " + jsonStatus);
         }
     }

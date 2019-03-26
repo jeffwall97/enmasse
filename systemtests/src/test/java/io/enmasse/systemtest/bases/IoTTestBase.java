@@ -14,14 +14,13 @@ import org.slf4j.Logger;
 import io.enmasse.iot.model.v1.IoTConfig;
 import io.enmasse.iot.model.v1.IoTProject;
 import io.enmasse.systemtest.CustomLogger;
-import io.enmasse.systemtest.ability.ITestBase;
 import io.enmasse.systemtest.apiclients.IoTConfigApiClient;
 import io.enmasse.systemtest.apiclients.IoTProjectApiClient;
 import io.enmasse.systemtest.timemeasuring.SystemtestsOperation;
 import io.enmasse.systemtest.timemeasuring.TimeMeasuringSystem;
 import io.enmasse.systemtest.utils.IoTUtils;
 
-public abstract class IoTTestBase extends TestBase implements ITestBase{
+public abstract class IoTTestBase extends TestBase {
 
     protected static final String IOT_ADDRESS_EVENT = "event";
     protected static final String IOT_ADDRESS_TELEMETRY = "telemetry";
