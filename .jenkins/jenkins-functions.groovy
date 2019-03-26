@@ -103,12 +103,16 @@ def postAction(String coresDir, String artifactDir, String debug) {
     }
 }
 
-def installEnmasse(String tag, Boolean skipDependencies, Boolean upgrade, Boolean generateTemplates) {
+def installEnmasse(String tag, Boolean skipDependencies, Boolean upgrade, Boolean generateTemplates, Boolean installIoT = false) {
     if (generateTemplates) {
         sh "make -C templates clean"
         sh 'make templates || true'
     }
     sh "./systemtests/scripts/deploy_enmasse.sh false 'templates/build/enmasse-${tag}' ${skipDependencies} ${upgrade}"
+
+    if (installIoT) {
+        sh "oc apply -f templates/build/enmasse-${tag}/install/preview-bundles/iot/"
+    }
 }
 
 def sendMail(address, jobName, buildUrl) {
