@@ -41,7 +41,7 @@ public class IoTUtils {
 
     public static void waitForIoTProjectReady(IoTProjectApiClient apiClient, IoTProject project) throws Exception {
         boolean isReady = false;
-        TimeoutBudget budget = new TimeoutBudget(5, TimeUnit.MINUTES);
+        TimeoutBudget budget = new TimeoutBudget(10, TimeUnit.MINUTES);
         while (budget.timeLeft() >= 0 && !isReady) {
             project = apiClient.getIoTProject(project.getMetadata().getName());
             isReady = project.getStatus()!=null && project.getStatus().isReady();
