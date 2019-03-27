@@ -4,6 +4,8 @@
  */
 package io.enmasse.systemtest.bases;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +16,10 @@ import org.slf4j.Logger;
 import io.enmasse.iot.model.v1.IoTConfig;
 import io.enmasse.iot.model.v1.IoTProject;
 import io.enmasse.systemtest.CustomLogger;
+import io.enmasse.systemtest.apiclients.AddressApiClient;
 import io.enmasse.systemtest.apiclients.IoTConfigApiClient;
 import io.enmasse.systemtest.apiclients.IoTProjectApiClient;
+import io.enmasse.systemtest.apiclients.UserApiClient;
 import io.enmasse.systemtest.timemeasuring.SystemtestsOperation;
 import io.enmasse.systemtest.timemeasuring.TimeMeasuringSystem;
 import io.enmasse.systemtest.utils.IoTUtils;
@@ -42,6 +46,9 @@ public abstract class IoTTestBase extends TestBase {
                 kubernetes.createNamespace(iotProjectNamespace);
             }
             iotProjectApiClient = new IoTProjectApiClient(kubernetes, iotProjectNamespace);
+            //additional clients that need to query against the namespace where iotprojects are created
+            addressApiClient = new AddressApiClient(kubernetes, iotProjectNamespace);
+            setUserApiClient(new UserApiClient(kubernetes, iotProjectNamespace));
         }
         if (iotConfigApiClient == null) {
             iotConfigApiClient = new IoTConfigApiClient(kubernetes);
@@ -57,11 +64,12 @@ public abstract class IoTTestBase extends TestBase {
                 for(IoTProject project : iotProjects) {
                     if(iotProjectApiClient.existsIoTProject(project.getMetadata().getName())) {
                         iotProjectApiClient.deleteIoTProject(project.getMetadata().getName());
+                        IoTUtils.waitForIoTProjectDeleted(kubernetes, addressApiClient, project);
                     } else {
                         log.info("IoTProject '" + project.getMetadata().getName() + "' doesn't exists!");
                     }
-
                 }
+                assertEquals(0, iotProjectApiClient.listIoTProjects().size());
                 iotProjects.clear();
                 log.info("All IoTConfigs will be removed");
                 for(IoTConfig config : iotConfigs) {

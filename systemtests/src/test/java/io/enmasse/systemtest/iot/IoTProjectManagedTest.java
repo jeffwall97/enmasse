@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +84,7 @@ class IoTProjectManagedTest extends IoTTestBase implements ITestBaseStandard {
         IoTProject created = iotProjectApiClient.getIoTProject(project.getMetadata().getName());
 
         assertNotNull(created);
-        assertEquals(kubernetes.getNamespace(), created.getMetadata().getNamespace());
+        assertEquals(iotProjectNamespace, created.getMetadata().getNamespace());
         assertEquals(project.getMetadata().getName(), created.getMetadata().getName());
         assertEquals(
                 project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpace().getName(),
@@ -139,12 +138,12 @@ class IoTProjectManagedTest extends IoTTestBase implements ITestBaseStandard {
 
         assertThat(actualAuthorization.getOperations(), containsInAnyOrder(Operation.recv, Operation.send));
 
-        assertThat(actualAuthorization.getAddresses(), containsInAnyOrder(Arrays.asList(IOT_ADDRESS_EVENT + addressSuffix,
+        assertThat(actualAuthorization.getAddresses(), containsInAnyOrder(IOT_ADDRESS_EVENT + addressSuffix,
                                                                             IOT_ADDRESS_CONTROL + addressSuffix,
                                                                             IOT_ADDRESS_TELEMETRY + addressSuffix,
                                                                             IOT_ADDRESS_EVENT + addressSuffix + "/*",
                                                                             IOT_ADDRESS_CONTROL + addressSuffix + "/*",
-                                                                            IOT_ADDRESS_TELEMETRY + addressSuffix + "/*")));
+                                                                            IOT_ADDRESS_TELEMETRY + addressSuffix + "/*"));
     }
 
     private boolean isOwner(IoTProject project, OwnerReference ownerReference) {

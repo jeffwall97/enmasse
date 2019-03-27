@@ -8,10 +8,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import io.enmasse.address.model.AddressSpace;
 import io.enmasse.iot.model.v1.IoTConfig;
 import io.enmasse.iot.model.v1.IoTProject;
 import io.enmasse.systemtest.CustomLogger;
+import io.enmasse.systemtest.Kubernetes;
 import io.enmasse.systemtest.TimeoutBudget;
+import io.enmasse.systemtest.apiclients.AddressApiClient;
 import io.enmasse.systemtest.apiclients.IoTConfigApiClient;
 import io.enmasse.systemtest.apiclients.IoTProjectApiClient;
 
@@ -50,6 +53,20 @@ public class IoTUtils {
         if (!isReady) {
             String jsonStatus = project != null && project.getStatus() != null ? project.getStatus().toString() : "Project doesn't have status";
             throw new IllegalStateException("IoTProject " + project.getMetadata().getName() + " is not in Ready state within timeout: " + jsonStatus);
+        }
+    }
+
+    public static void waitForIoTProjectDeleted(Kubernetes kubernetes, AddressApiClient addressApiClient, IoTProject project) throws Exception {
+        if(project.getSpec().getDownstreamStrategy().getManagedStrategy() != null) {
+            String addressSpaceName = project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpace().getName();
+            AddressSpace addressSpace = AddressSpaceUtils.getAddressSpacesObjects(addressApiClient)
+                .stream()
+                .filter(space -> space.getMetadata().getName().equals(addressSpaceName))
+                .findFirst()
+                .orElse(null);
+            if(addressSpace != null) {
+                AddressSpaceUtils.waitForAddressSpaceDeleted(kubernetes, addressSpace);
+            }
         }
     }
 
