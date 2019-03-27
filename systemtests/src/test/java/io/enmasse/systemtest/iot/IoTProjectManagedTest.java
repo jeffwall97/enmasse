@@ -56,7 +56,25 @@ class IoTProjectManagedTest extends IoTTestBase implements ITestBaseStandard {
                 .withNewSpec()
                 .withNewDownstreamStrategy()
                 .withNewManagedStrategy()
-                .withAddressSpaceName(addressSpaceName)
+                .withNewAddressSpace()
+                .withName(addressSpaceName)
+                .withPlan("standard-unlimited")
+                .withType("standard")
+                .endAddressSpace()
+                .withNewAddresses()
+                .withNewTelemetry()
+                .withPlan("standard-small-anycast")
+                .withType("anycast")
+                .endTelemetry()
+                .withNewEvent()
+                .withPlan("standard-small-queue")
+                .withType("queue")
+                .endEvent()
+                .withNewCommand()
+                .withPlan("standard-small-anycast")
+                .withType("anycast")
+                .endCommand()
+                .endAddresses()
                 .endManagedStrategy()
                 .endDownstreamStrategy()
                 .endSpec()
@@ -70,8 +88,8 @@ class IoTProjectManagedTest extends IoTTestBase implements ITestBaseStandard {
         assertEquals(kubernetes.getNamespace(), created.getMetadata().getNamespace());
         assertEquals(project.getMetadata().getName(), created.getMetadata().getName());
         assertEquals(
-                project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpaceName(),
-                created.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpaceName());
+                project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpace().getName(),
+                created.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpace().getName());
 
         assertManaged(created);
 
@@ -79,8 +97,8 @@ class IoTProjectManagedTest extends IoTTestBase implements ITestBaseStandard {
 
     private void assertManaged(IoTProject project) throws Exception {
         //address space s
-        AddressSpace addressSpace = getAddressSpace(project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpaceName());
-        assertEquals(project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpaceName(), addressSpace.getMetadata().getName());
+        AddressSpace addressSpace = getAddressSpace(project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpace().getName());
+        assertEquals(project.getSpec().getDownstreamStrategy().getManagedStrategy().getAddressSpace().getName(), addressSpace.getMetadata().getName());
         assertEquals("standard", addressSpace.getSpec().getType());
         assertEquals("standard-unlimited", addressSpace.getSpec().getPlan());
 
@@ -97,15 +115,18 @@ class IoTProjectManagedTest extends IoTTestBase implements ITestBaseStandard {
             .count());
         int correctAddressesCounter = 0;
         for(Address address : addresses) {
-            if(address.getSpec().getAddress().equals(IOT_ADDRESS_EVENT+addressSuffix) && address.getSpec().getType().equals("queue")) {
+            if ( address.getSpec().getAddress().equals(IOT_ADDRESS_EVENT + addressSuffix) ) {
+                assertEquals("queue", address.getSpec().getType());
+                assertEquals("standard-small-queue", address.getSpec().getPlan());
                 correctAddressesCounter++;
-            }else if(address.getSpec().getAddress().equals(IOT_ADDRESS_CONTROL+addressSuffix) && address.getSpec().getType().equals("anycast")) {
-                correctAddressesCounter++;
-            }else if(address.getSpec().getAddress().equals(IOT_ADDRESS_TELEMETRY+addressSuffix) && address.getSpec().getType().equals("anycast")) {
+            } else if ( address.getSpec().getAddress().equals(IOT_ADDRESS_CONTROL + addressSuffix)
+                    || address.getSpec().getAddress().equals(IOT_ADDRESS_TELEMETRY + addressSuffix) ) {
+                assertEquals("anycast", address.getSpec().getType());
+                assertEquals("standard-small-anycast", address.getSpec().getPlan());
                 correctAddressesCounter++;
             }
         }
-        assertEquals(3, correctAddressesCounter, "IoT addresses missing "+addresses);
+        assertEquals(3, correctAddressesCounter, "There are incorrect IoT addresses "+addresses);
 
         //username "adapter"
         //name "project-address-space"+".adapter"
