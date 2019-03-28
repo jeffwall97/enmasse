@@ -33,7 +33,7 @@ function setup_test_openshift() {
     fi
     ansible-playbook ${TEMPLATES_INSTALL_DIR}/ansible/playbooks/openshift/deploy_all.yml -i ${CURDIR}/../ansible/inventory/systemtests.inventory --extra-vars "{\"namespace\": \"${KUBERNETES_NAMESPACE}\", \"admin_user\": \"${OPENSHIFT_USER}\"}"
     if [ "$DEPLOY_IOT" = "true" ]; then
-        oc apply -f ${TEMPLATES_INSTALL_DIR}/install/preview-bundles/iot/
+        oc apply -n ${KUBERNETES_NAMESPACE} -f ${TEMPLATES_INSTALL_DIR}/install/preview-bundles/iot/
     fi
     wait_until_enmasse_up 'openshift' ${KUBERNETES_NAMESPACE} ${UPGRADE}
 }
