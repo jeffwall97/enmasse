@@ -108,11 +108,7 @@ def installEnmasse(String tag, Boolean skipDependencies, Boolean upgrade, Boolea
         sh "make -C templates clean"
         sh 'make templates || true'
     }
-    sh "./systemtests/scripts/deploy_enmasse.sh false 'templates/build/enmasse-${tag}' ${skipDependencies} ${upgrade}"
-
-    if (installIoT) {
-        sh "oc apply -f templates/build/enmasse-${tag}/install/preview-bundles/iot/"
-    }
+    sh "DEPLOY_IOT=${installIoT} ./systemtests/scripts/deploy_enmasse.sh false 'templates/build/enmasse-${tag}' ${skipDependencies} ${upgrade}"
 }
 
 def sendMail(address, jobName, buildUrl) {
